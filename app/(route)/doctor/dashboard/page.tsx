@@ -11,7 +11,7 @@ export default function dashboard() {
   return (
     <div className="p-2 md:p-4">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold mb-1">Good morning, Dr. Johnson!</h1>
+        <h1 className="text-2xl font-semibold mb-1">Good morning, Dr. Tyagi!</h1>
         <p className="text-gray-500">Here&apos;s what&apos;s happening with your hospital today.</p>
       </div>
 

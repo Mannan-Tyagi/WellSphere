@@ -33,14 +33,14 @@ interface NavSection {
 const navigation: NavSection[] = [
   {
     items: [
-      { icon: LayoutDashboard, label: "Dashboard", href: "/doctor/dashboard" }
+      { icon: LayoutDashboard, label: "Dashboard", href: "/Doctor/Dashboard" }
     ],
   },
   {
     title: "CLINIC",
     items: [
-      { icon: Calendar, label: "Reservations", href: "/doctor/calendar", badge: 3 },
-      { icon: Users, label: "Patients", href: "/doctor/patients" },
+      { icon: Calendar, label: "Reservations", href: "/Doctor/Calendar", badge: 3 },
+      { icon: Users, label: "Patients", href: "/Doctor/Patients" },
       { icon: Stethoscope, label: "Treatments", href: "/doctor/treatments" },
       { icon: UserCog, label: "Staff List", href: "/doctor/staff" },
     ],
@@ -124,13 +124,13 @@ function Sidebar({ defaultOpen = true }: { defaultOpen?: boolean }) {
         <div className="flex items-center justify-between">
           <div className={`flex items-center ${isOpen ? "space-x-2" : "justify-center w-full"}`}>
             <div className="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center">
-              Z
+              W
             </div>
             {isOpen && (
               <div>
-                <p className="font-semibold">Zendenta</p>
-                <p className="text-xs text-gray-500">Avicena Clinic</p>
-                <p className="text-xs text-gray-500">BAS Euclid Avenue,CA</p>
+                <p className="font-semibold">WellSphere</p>
+                <p className="text-xs text-gray-500">Ayushman Clinic</p>
+                <p className="text-xs text-gray-500">MG Road, Bengaluru, KA</p>
               </div>
             )}
           </div>
