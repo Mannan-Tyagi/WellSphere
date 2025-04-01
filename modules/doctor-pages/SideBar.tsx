@@ -9,6 +9,7 @@ import {
   FileText,
   HeadphonesIcon,
   LayoutDashboard,
+  MessageCircle,
   Microscope,
   Package,
   ShoppingCart,
@@ -16,6 +17,7 @@ import {
   TrendingUp,
   UserCog,
   Users,
+  ClipboardList,
 } from "lucide-react";
 
 interface NavItem {
@@ -39,34 +41,34 @@ const navigation: NavSection[] = [
   {
     title: "CLINIC",
     items: [
-      { icon: Calendar, label: "Reservations", href: "/Doctor/Calendar", badge: 3 },
+      { icon: Calendar, label: "Reservations", href: "/Doctor/Calendar"},
       { icon: Users, label: "Patients", href: "/Doctor/Patients" },
-      { icon: Stethoscope, label: "Treatments", href: "/doctor/treatments" },
-      { icon: UserCog, label: "Staff List", href: "/doctor/staff" },
+      { icon: MessageCircle, label: "Messaging", href: "/Doctor/Messaging" },
+      { icon: ClipboardList, label: "Consultation", href: "/Doctor/Consultation" },
     ],
   },
-  {
-    title: "FINANCE",
-    items: [
-      { icon: CreditCard, label: "Accounts", href: "/doctor/accounts" },
-      { icon: TrendingUp, label: "Sales", href: "/doctor/sales" },
-      { icon: ShoppingCart, label: "Purchases", href: "/doctor/purchases" },
-      { icon: CreditCard, label: "Payment Method", href: "/doctor/payment-method" },
-    ],
-  },
-  {
-    title: "PHYSICALASSET",
-    items: [
-      { icon: Package, label: "Stocks", href: "/doctor/stocks", badge: 5 },
-      { icon: Microscope, label: "Peripherals", href: "/doctor/peripherals" },
-    ],
-  },
-  {
-    items: [
-      { icon: FileText, label: "Report", href: "/doctor/report" },
-      { icon: HeadphonesIcon, label: "Customer Support", href: "/doctor/support" },
-    ],
-  },
+  // {
+  //   title: "FINANCE",
+  //   items: [
+  //     { icon: CreditCard, label: "Accounts", href: "/doctor/accounts" },
+  //     { icon: TrendingUp, label: "Sales", href: "/doctor/sales" },
+  //     { icon: ShoppingCart, label: "Purchases", href: "/doctor/purchases" },
+  //     { icon: CreditCard, label: "Payment Method", href: "/doctor/payment-method" },
+  //   ],
+  // },
+  // {
+  //   title: "PHYSICALASSET",
+  //   items: [
+  //     { icon: Package, label: "Stocks", href: "/doctor/stocks", badge: 5 },
+  //     { icon: Microscope, label: "Peripherals", href: "/doctor/peripherals" },
+  //   ],
+  // },
+  // {
+  //   items: [
+  //     { icon: FileText, label: "Report", href: "/doctor/report" },
+  //     { icon: HeadphonesIcon, label: "Customer Support", href: "/doctor/support" },
+  //   ],
+  // },
 ];
 
 function Sidebar({ defaultOpen = true }: { defaultOpen?: boolean }) {

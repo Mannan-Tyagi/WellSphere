@@ -14,9 +14,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PatientCard from "@/modules/doctor-pages/patients/PatientCard";
 import PatientDetailModal from "@/modules/doctor-pages/patients/PatientDetailModal";
-import { Search, Filter, SlidersHorizontal, LayoutGrid, List } from "lucide-react";
-import { Patient, PatientStatus } from "@/types/patient";
-import { cn } from "@/lib/utils";
+import ScheduleAppointmentModal from "@/modules/doctor-pages/patients/ScheduleAppointmentModal";
+import { Search, Filter, SlidersHorizontal, LayoutGrid, List, Bell } from "lucide-react";
+import { Patient } from "@/modules/doctor-pages/patients/patient";
+import { cn, formatDate } from "@/lib/utils";
+import SendMessageModal from "@/modules/doctor-pages/patients/SendMessageModal";
+import AddPatientModal from "@/modules/doctor-pages/patients/AddPatientModal";
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -26,10 +29,16 @@ export default function PatientsPage() {
   const [conditionFilter, setConditionFilter] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>("name-asc");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [currentDate, setCurrentDate] = useState<string>("2025-03-26");
+  const [currentTime, setCurrentTime] = useState<string>("06:03:20");
   
-  // State for patient detail modal
+  // State for modals
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Fetch patients data
   useEffect(() => {
@@ -87,6 +96,15 @@ export default function PatientsPage() {
             { date: "Feb", value: 155 },
             { date: "Mar", value: 145 },
           ] }
+        ],
+        upcomingAppointments: [
+          {
+            id: "U001",
+            date: "2025-04-05",
+            time: "11:15 AM",
+            type: "Follow-up",
+            doctorName: "Dr. Julia Smith"
+          }
         ]
       },
       {
@@ -130,7 +148,8 @@ export default function PatientsPage() {
             { date: "Feb", value: 148 },
             { date: "Mar", value: 145 },
           ] }
-        ]
+        ],
+        upcomingAppointments: []
       },
       {
         id: "P003",
@@ -173,6 +192,15 @@ export default function PatientsPage() {
             { date: "Feb", value: 465 },
             { date: "Mar", value: 480 },
           ] }
+        ],
+        upcomingAppointments: [
+          {
+            id: "U002",
+            date: "2025-06-22",
+            time: "10:00 AM",
+            type: "Annual Check-up",
+            doctorName: "Dr. Rebecca Lee"
+          }
         ]
       },
       {
@@ -218,6 +246,15 @@ export default function PatientsPage() {
             { date: "Feb", value: 230 },
             { date: "Mar", value: 220 },
           ] }
+        ],
+        upcomingAppointments: [
+          {
+            id: "U003",
+            date: "2025-03-28",
+            time: "9:30 AM",
+            type: "Urgent Follow-up",
+            doctorName: "Dr. James Wilson"
+          }
         ]
       },
       {
@@ -260,6 +297,15 @@ export default function PatientsPage() {
             { date: "Feb", value: 11 },
             { date: "Mar", value: 8 },
           ] }
+        ],
+        upcomingAppointments: [
+          {
+            id: "U004",
+            date: "2025-04-15",
+            time: "3:45 PM",
+            type: "Therapy Session",
+            doctorName: "Dr. Sophia Chen"
+          }
         ]
       },
       {
@@ -303,12 +349,19 @@ export default function PatientsPage() {
             { date: "Feb", value: 7 },
             { date: "Mar", value: 8 },
           ] }
-        ]
+        ],
+        upcomingAppointments: []
       }
     ];
     
     setPatients(mockPatients);
     setFilteredPatients(mockPatients);
+
+    // Set current date and time from UTC value
+    const currentDateTime = "2025-03-26 06:03:20";
+    const [date, time] = currentDateTime.split(" ");
+    setCurrentDate(date);
+    setCurrentTime(time);
   }, []);
 
   // Filter and sort patients
@@ -361,34 +414,148 @@ export default function PatientsPage() {
     new Set(patients.map(patient => patient.condition))
   );
 
+  // Handle add new patient
+  const handleAddPatient = (patientData: Omit<Patient, 'id'>) => {
+    const newId = `P${(patients.length + 1).toString().padStart(3, '0')}`;
+    
+    const newPatient: Patient = {
+      ...patientData,
+      id: newId,
+      appointments: [],
+      testResults: [],
+      upcomingAppointments: []
+    };
+    
+    setPatients(prev => [...prev, newPatient]);
+    setIsAddPatientModalOpen(false);
+    showSuccessMessage(`Patient ${patientData.name} has been added successfully`);
+  };
+
   // Handle opening patient detail modal
   const handleViewPatient = (patient: Patient) => {
     setSelectedPatient(patient);
     setIsDetailModalOpen(true);
   };
 
-  // Handle closing patient detail modal
-  const handleCloseDetailModal = () => {
-    setIsDetailModalOpen(false);
-  };
-
-  // Handle scheduling appointment (modal functionality)
+  // Handle scheduling appointment
   const handleScheduleAppointment = (patientId: string) => {
-    alert(`Scheduling appointment for patient ${patientId}`);
-    // In a real app, this would open a scheduling modal
+    const patient = patients.find(p => p.id === patientId);
+    if (patient) {
+      setSelectedPatient(patient);
+      setIsScheduleModalOpen(true);
+    }
   };
 
-  // Handle sending message (modal functionality)
+  // Handle sending message
   const handleSendMessage = (patientId: string) => {
-    alert(`Opening message composer for patient ${patientId}`);
-    // In a real app, this would open a message composer
+    const patient = patients.find(p => p.id === patientId);
+    if (patient) {
+      setSelectedPatient(patient);
+      setIsMessageModalOpen(true);
+    }
+  };
+
+  // Handle appointment scheduling submission
+  const handleScheduleSubmit = (appointmentData: any) => {
+    if (!selectedPatient) return;
+    
+    const newAppointmentId = `U${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    const newAppointment = {
+      id: newAppointmentId,
+      date: appointmentData.date,
+      time: appointmentData.time,
+      type: appointmentData.type,
+      doctorName: appointmentData.doctor,
+    };
+    
+    // Update the patient's upcoming appointments
+    const updatedPatients = patients.map(patient => {
+      if (patient.id === selectedPatient.id) {
+        const upcomingAppointments = patient.upcomingAppointments || [];
+        return {
+          ...patient,
+          upcomingAppointments: [...upcomingAppointments, newAppointment]
+        };
+      }
+      return patient;
+    });
+    
+    setPatients(updatedPatients);
+    setIsScheduleModalOpen(false);
+    showSuccessMessage(`Appointment scheduled with ${selectedPatient.name} for ${formatDate(appointmentData.date)} at ${appointmentData.time}`);
+  };
+
+  // Handle message send
+  const handleMessageSend = (messageData: any) => {
+    if (!selectedPatient) return;
+    setIsMessageModalOpen(false);
+    showSuccessMessage(`Message sent to ${selectedPatient.name}`);
+  };
+
+  // Show success message and auto-hide after delay
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 5000);
   };
 
   return (
     <div className="container mx-auto p-6 bg-gradient-to-br from-white to-blue-50">
+      {/* Current Date/Time and Welcome Bar */}
+      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-medium text-[#006D77]">Welcome, Dr. Smith</h2>
+          <p className="text-gray-500 text-sm">Current date: {formatDate(currentDate)} | {currentTime}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Bell className="h-6 w-6 text-[#006D77] cursor-pointer" />
+            <span className="absolute -top-1 -right-1 bg-red-500 rounded-full h-4 w-4 text-xs text-white flex items-center justify-center">3</span>
+          </div>
+          <div className="h-8 w-8 bg-[#006D77] rounded-full text-white flex items-center justify-center font-medium">
+            JS
+          </div>
+        </div>
+      </div>
+
+      {/* Success Message Toast */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-md z-50 animate-fade-in-down max-w-md">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm">{successMessage}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button 
+                  type="button" 
+                  className="inline-flex rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none"
+                  onClick={() => setSuccessMessage(null)}
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-medium text-gray-900">My Patients</h1>
-        <Button className="bg-gradient-to-r from-[#006D77] to-[#249EA0] text-white hover:opacity-90 transition-all duration-300">
+        <div>
+          <h1 className="text-2xl font-medium text-gray-900">My Patients</h1>
+          <p className="text-gray-500">Manage and monitor patient records</p>
+        </div>
+        <Button 
+          className="bg-gradient-to-r from-[#006D77] to-[#249EA0] text-white hover:opacity-90 transition-all duration-300"
+          onClick={() => setIsAddPatientModalOpen(true)}
+        >
           + Add New Patient
         </Button>
       </div>
@@ -418,7 +585,7 @@ export default function PatientsPage() {
             <SelectTrigger className="w-[180px] border-[#E8F3F4] focus:ring-[#006D77]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="stable">Stable</SelectItem>
               <SelectItem value="needs-attention">Needs Attention</SelectItem>
@@ -433,7 +600,7 @@ export default function PatientsPage() {
             <SelectTrigger className="w-[180px] border-[#E8F3F4] focus:ring-[#006D77]">
               <SelectValue placeholder="Condition" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="all">All Conditions</SelectItem>
               {uniqueConditions.map(condition => (
                 <SelectItem key={condition} value={condition}>
@@ -478,7 +645,7 @@ export default function PatientsPage() {
               <SelectTrigger className="w-[180px] border-[#E8F3F4] focus:ring-[#006D77]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="name-asc">Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                 <SelectItem value="recent-visit">Most Recent Visit</SelectItem>
@@ -547,10 +714,47 @@ export default function PatientsPage() {
       {selectedPatient && (
         <PatientDetailModal 
           isOpen={isDetailModalOpen} 
-          onClose={handleCloseDetailModal} 
+          onClose={() => setIsDetailModalOpen(false)}
           patient={selectedPatient}
-          onScheduleAppointment={() => handleScheduleAppointment(selectedPatient.id)}
-          onSendMessage={() => handleSendMessage(selectedPatient.id)}
+          onScheduleAppointment={() => {
+            setIsDetailModalOpen(false);
+            setTimeout(() => {
+              handleScheduleAppointment(selectedPatient.id);
+            }, 100);
+          }}
+          onSendMessage={() => {
+            setIsDetailModalOpen(false);
+            setTimeout(() => {
+              handleSendMessage(selectedPatient.id);
+            }, 100);
+          }}
+        />
+      )}
+
+      {/* Add Patient Modal */}
+      <AddPatientModal
+        isOpen={isAddPatientModalOpen}
+        onClose={() => setIsAddPatientModalOpen(false)}
+        onSubmit={handleAddPatient}
+      />
+
+      {/* Schedule Appointment Modal */}
+      {selectedPatient && (
+        <ScheduleAppointmentModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => setIsScheduleModalOpen(false)}
+          patient={selectedPatient}
+          onSubmit={handleScheduleSubmit}
+        />
+      )}
+
+      {/* Send Message Modal */}
+      {selectedPatient && (
+        <SendMessageModal
+          isOpen={isMessageModalOpen}
+          onClose={() => setIsMessageModalOpen(false)}
+          patient={selectedPatient}
+          onSubmit={handleMessageSend}
         />
       )}
     </div>

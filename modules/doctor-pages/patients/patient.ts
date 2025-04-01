@@ -20,6 +20,7 @@ export interface Patient {
   appointments?: Appointment[];
   testResults?: TestResult[];
   healthMetrics?: HealthMetric[];
+  upcomingAppointments?: UpcomingAppointment[];
 }
 
 export interface Medication {
@@ -37,6 +38,14 @@ export interface Appointment {
   doctorName: string;
   notes?: string;
   prescriptions?: string[];
+}
+
+export interface UpcomingAppointment {
+  id: string;
+  date: string;
+  time: string;
+  type: string;
+  doctorName: string;
 }
 
 export interface TestResult {
