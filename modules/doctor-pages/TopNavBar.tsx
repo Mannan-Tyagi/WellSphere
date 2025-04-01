@@ -48,10 +48,10 @@ function TopNavBar({ toggleMobileMenu }: TopNavBarProps) {
 
           <div className="flex items-center gap-3 ml-4">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
-              SJ
+              MT
             </div>
             <div className="hidden md:block">
-              <p className="text-sm font-medium">Dr. Sarah Johnson</p>
+              <p className="text-sm font-medium">Dr. Mannan Tyagi</p>
               <p className="text-xs text-gray-500">Head Physician</p>
             </div>
           </div>

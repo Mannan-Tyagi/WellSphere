@@ -1,3 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Zendenta-inspired theme variables */
+:root {
+  --color-primary: #06B6D4; /* Teal color */
+  --color-primary-light: #ECFEFF;
+  --color-secondary: #4A6572;
+  --color-accent: #F9A826;
+  --color-positive: #34D399;
+  --color-danger: #F87171;
+  --color-warning: #FBBF24;
+  --color-background: #FFFFFF;
+  --color-surface: #F9FAFB;
+}
+
+/* Base Typography */
+body {
+  font-family: 'Montserrat', sans-serif;
+  color: #334155;
+  background-color: #F1F5F9;
+}
+
+/* Serif Fonts for Headers */
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom Calendar Styles */
+.calendar-cell-hover:hover {
+  background-color: var(--color-primary-light);
+}
+
+.appointment-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Draggable Element Styles */
+.draggable-element {
+  cursor: grab;
+}
+
+.draggable-element:active {
+  cursor: grabbing;
+}
+
+/* Zendenta-inspired Button Styles */
+.zendenta-btn {
+  @apply rounded-md font-medium transition duration-200;
+}
+
+.zendenta-btn-primary {
+  @apply bg-cyan-600 text-white hover:bg-cyan-700;
+}
+
+.zendenta-btn-secondary {
+  @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Accessibility improvements */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@layer utilities {
+  .animate-fade-in-down {
+    animation: fadeInDown 0.5s ease-out;
+  }
+
+  @keyframes fadeInDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
