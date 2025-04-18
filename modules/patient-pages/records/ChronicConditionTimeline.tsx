@@ -144,23 +144,42 @@ const ChronicConditionTimeline: React.FC<ChronicConditionTimelineProps> = ({ exp
     }
   };
 
+  // Helper function to get the icon for event types
+  const getEventIcon = (type, size = 16) => {
+    // Handle undefined type case
+    if (!type) return <Activity size={size} />;
+    
+    switch (type) {
+      case 'checkup':
+        return <FileText size={size} />;
+      case 'medication':
+        return <Pill size={size} />;
+      case 'diagnosis':
+        return <Activity size={size} />;
+      case 'exacerbation':
+        return <AlertTriangle size={size} />;
+      default:
+        // Always return a valid component for unknown types
+        return <Activity size={size} />;
+    }
+  };
+
   return (
     <div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="inline-flex h-auto space-x-2 bg-transparent p-0 mb-4">
           {mockConditions.map(condition => {
+            // Make sure the ConditionIcon is defined
             const ConditionIcon = condition.icon;
-            if (!ConditionIcon) {
-              console.error(`Icon not found for condition: ${condition.name}`);
-              return null;
-            }
+            // Safety check - if icon is undefined, don't render this tab
+            if (!ConditionIcon) return null;
             
             return (
               <TabsTrigger 
                 key={condition.id} 
                 value={condition.id}
                 className="flex items-center gap-1 rounded-md border px-3 py-2"
-                style={{
+                style={{ 
                   borderColor: activeTab === condition.id ? condition.primaryColor : '',
                   backgroundColor: activeTab === condition.id ? condition.secondaryColor : '',
                   color: activeTab === condition.id ? condition.primaryColor : ''
@@ -325,12 +344,8 @@ const ChronicConditionTimeline: React.FC<ChronicConditionTimelineProps> = ({ exp
                         <div className="mr-3 relative">
                           <div className="h-8 w-8 rounded-full flex items-center justify-center" 
                                style={{ backgroundColor: activeCondition.secondaryColor, color: activeCondition.primaryColor }}>
-                            {event.type === 'checkup' && <FileText size={16} />}
-                            {event.type === 'medication' && <Pill size={16} />}
-                            {event.type === 'diagnosis' && <Activity size={16} />}
-                            {event.type === 'exacerbation' && <AlertTriangle size={16} />}
-                            {!['checkup', 'medication', 'diagnosis', 'exacerbation'].includes(event.type) && 
-                              <Activity size={16} />}
+                            {/* Add safety check for event.type */}
+                            {event && event.type ? getEventIcon(event.type) : <Activity size={16} />}
                           </div>
                           {i !== activeCondition.recentEvents.length - 1 && (
                             <div className="absolute left-1/2 top-8 bottom-0 w-0.5 -ml-px bg-gray-200 h-8"></div>
