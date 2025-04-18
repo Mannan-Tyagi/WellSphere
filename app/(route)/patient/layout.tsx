@@ -11,15 +11,15 @@ export default function PatientLayout({ children }: {
   useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) {
-    return <div className="min-h-screen">{children}</div>;
+    return <div className="min-h-screen"></div>; // Render a placeholder instead of children
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <PatientSidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+  <div className="flex h-screen bg-gray-50">
+    <PatientSidebar />
+    <main className="flex-1 overflow-y-auto">
+      {children}
+    </main>
+  </div>
   );
 }
