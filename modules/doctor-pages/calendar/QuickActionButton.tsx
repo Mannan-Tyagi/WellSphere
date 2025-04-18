@@ -99,36 +99,41 @@ export const QuickActionButton: React.FC = () => {
 
   return (
     <>
-      <div ref={menuRef} className="fixed right-8 bottom-8 z-30">
-        {/* Action Menu */}
-        {isMenuOpen && (
-          <div className="absolute bottom-16 right-0 mb-2 w-60 rounded-lg bg-white shadow-lg border border-slate-200 overflow-hidden transition-all duration-200 ease-in-out">
-            <div className="py-1 max-h-[400px] overflow-y-auto">
-              {actions.map((action, index) => (
-                <button
-                  key={index}
-                  onClick={action.action}
-                  className="flex w-full items-center px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                >
-                  <span className={`p-1.5 rounded-full mr-3 ${action.color} text-white`}>
-                    {action.icon}
-                  </span>
-                  <span>{action.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Main Button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className={`p-4 rounded-full shadow-lg text-white transition-all duration-300 ${
-            isMenuOpen ? 'bg-slate-700 rotate-45' : 'bg-teal-600 hover:bg-teal-700'
-          }`}
+      <div className="fixed bottom-0 right-0 p-8 z-30 pointer-events-none">
+        <div 
+          ref={menuRef} 
+          className="relative pointer-events-auto"
         >
-          <PlusIcon className="w-6 h-6" />
-        </button>
+          {/* Action Menu */}
+          {isMenuOpen && (
+            <div className="absolute bottom-16 right-0 mb-2 w-60 rounded-lg bg-white shadow-lg border border-slate-200 overflow-hidden transition-all duration-200 ease-in-out">
+              <div className="py-1 max-h-[400px] overflow-y-auto">
+                {actions.map((action, index) => (
+                  <button
+                    key={index}
+                    onClick={action.action}
+                    className="flex w-full items-center px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    <span className={`p-1.5 rounded-full mr-3 ${action.color} text-white`}>
+                      {action.icon}
+                    </span>
+                    <span>{action.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Main Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={`p-4 rounded-full shadow-lg text-white transition-all duration-300 ${
+              isMenuOpen ? 'bg-slate-700 rotate-45' : 'bg-teal-600 hover:bg-teal-700'
+            }`}
+          >
+            <PlusIcon className="w-6 h-6" />
+          </button>
+        </div>
       </div>
       
       {/* Modals */}

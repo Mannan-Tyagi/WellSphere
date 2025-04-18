@@ -1,11 +1,19 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import PatientSidebar from '@/modules/patient-pages/PatientSidebar';
 
-export default function PatientLayout({
-  children,
-}: {
+export default function PatientLayout({ children }: {
   children: React.ReactNode;
 }) {
+  // Mount check to avoid hydration errors
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) {
+    return <div className="min-h-screen">{children}</div>;
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <PatientSidebar />
