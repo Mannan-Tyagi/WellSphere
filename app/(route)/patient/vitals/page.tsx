@@ -7,7 +7,6 @@ import VitalsTrackingDashboard from '@/modules/patient-pages/vitals/VitalsTracki
 export default function VitalsPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <PatientSidebar />
       <div className="flex-1 p-6">
         <VitalsTrackingDashboard />
       </div>
