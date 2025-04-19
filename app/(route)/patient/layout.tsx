@@ -16,7 +16,7 @@ export default function PatientLayout({ children }: {
 
   return (
   <div className="flex h-screen bg-gray-50">
-    <PatientSidebar />
+    {/* <PatientSidebar /> */}
     <main className="flex-1 overflow-y-auto">
       {children}
     </main>
