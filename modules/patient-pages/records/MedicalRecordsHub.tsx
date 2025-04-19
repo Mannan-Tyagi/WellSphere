@@ -17,10 +17,15 @@ import {
   FlaskConical,
   Image as ImageIcon,
   Pill,
-  Share2
+  Share2,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { format } from 'date-fns';
 import RecordsQRGenerator from './RecordsQRGenerator';
 import RecordsCategorization from './RecordsCategorization';
 import ChronicConditionTimeline from './ChronicConditionTimeline';
@@ -37,20 +42,240 @@ export function MedicalRecordsHub() {
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
 
+  const [showQrScanner, setShowQrScanner] = useState(false);
+  const [qrValue, setQrValue] = useState('');
+  const [dateRange, setDateRange] = useState<{from: Date | undefined, to: Date | undefined}>({
+    from: undefined,
+    to: undefined
+  });
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedShareOptions, setSelectedShareOptions] = useState<string[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+
   const openDocument = (document) => {
     setSelectedDocument(document);
     setIsPdfViewerOpen(true);
   };
 
-  // Example document to view
+  const handleQrScan = (result) => {
+    if (result) {
+      setQrValue(result);
+      console.log('Fetching records with ID:', result);
+      setShowQrScanner(false);
+    }
+  };
+
+  const filterRecords = (records) => {
+    if (!records) return [];
+    
+    return records.filter(record => {
+      if (dateRange.from && record.date < dateRange.from) return false;
+      if (dateRange.to && record.date > dateRange.to) return false;
+      if (searchKeyword && !record.title.toLowerCase().includes(searchKeyword.toLowerCase())) return false;
+      return true;
+    });
+  };
+
+  const toggleShareOption = (option) => {
+    setSelectedShareOptions(prev => 
+      prev.includes(option) 
+        ? prev.filter(item => item !== option)
+        : [...prev, option]
+    );
+  };
+
+  const handleShareRecords = () => {
+    console.log('Sharing records with options:', selectedShareOptions);
+    setShowShareModal(false);
+    setSelectedShareOptions([]);
+  };
+
+  const renderQrScanner = () => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Scan QR Code</h3>
+          <Button variant="ghost" size="sm" onClick={() => setShowQrScanner(false)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="bg-gray-100 h-64 flex items-center justify-center rounded-md mb-4 relative">
+          <div className="text-center">
+            <QrCode className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm text-gray-500">Camera access required for scanning</p>
+          </div>
+          
+          <div className="absolute inset-0 border-2 border-[#006D77] rounded-md">
+            <div className="h-0.5 bg-[#006D77] w-full absolute top-1/2 animate-pulse"></div>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600">
+            Position the QR code within the scanner. The code will be detected automatically.
+          </p>
+          
+          <p className="text-sm text-gray-600">
+            Or enter the record ID manually:
+          </p>
+          
+          <div className="flex gap-2">
+            <Input 
+              placeholder="Enter record ID" 
+              value={qrValue} 
+              onChange={e => setQrValue(e.target.value)}
+              className="bg-white"
+            />
+            <Button 
+              className="bg-[#006D77] hover:bg-[#005A64]"
+              onClick={() => setShowQrScanner(false)}
+            >
+              Submit
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderShareModal = () => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Share Medical Records</h3>
+          <Button variant="ghost" size="sm" onClick={() => setShowShareModal(false)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium mb-2">Select Recipients</h4>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Checkbox 
+                  id="share-doctor" 
+                  checked={selectedShareOptions.includes('doctor')}
+                  onCheckedChange={() => toggleShareOption('doctor')}
+                />
+                <label htmlFor="share-doctor" className="ml-2 text-sm">
+                  My Healthcare Providers
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <Checkbox 
+                  id="share-family" 
+                  checked={selectedShareOptions.includes('family')}
+                  onCheckedChange={() => toggleShareOption('family')}
+                />
+                <label htmlFor="share-family" className="ml-2 text-sm">
+                  Family Members
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <Checkbox 
+                  id="share-other" 
+                  checked={selectedShareOptions.includes('other')}
+                  onCheckedChange={() => toggleShareOption('other')}
+                />
+                <label htmlFor="share-other" className="ml-2 text-sm">
+                  Other (Email)
+                </label>
+              </div>
+              
+              {selectedShareOptions.includes('other') && (
+                <Input 
+                  placeholder="Enter email address" 
+                  className="mt-2 bg-white"
+                />
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-medium mb-2">Access Duration</h4>
+            <Select defaultValue="7days">
+              <SelectTrigger className="bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="24hr">24 hours</SelectItem>
+                <SelectItem value="7days">7 days</SelectItem>
+                <SelectItem value="30days">30 days</SelectItem>
+                <SelectItem value="permanent">Permanent</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="pt-3 border-t">
+            <h4 className="text-sm font-medium mb-2">Select Records to Share</h4>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Checkbox 
+                  id="share-all" 
+                  checked={selectedShareOptions.includes('all-records')}
+                  onCheckedChange={() => toggleShareOption('all-records')}
+                />
+                <label htmlFor="share-all" className="ml-2 text-sm">
+                  All Records
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <Checkbox 
+                  id="share-lab" 
+                  checked={selectedShareOptions.includes('lab-results')}
+                  onCheckedChange={() => toggleShareOption('lab-results')}
+                />
+                <label htmlFor="share-lab" className="ml-2 text-sm">
+                  Lab Results Only
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <Checkbox 
+                  id="share-imaging" 
+                  checked={selectedShareOptions.includes('imaging')}
+                  onCheckedChange={() => toggleShareOption('imaging')}
+                />
+                <label htmlFor="share-imaging" className="ml-2 text-sm">
+                  Imaging Results Only
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowShareModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="bg-[#006D77] hover:bg-[#005A64]"
+              onClick={handleShareRecords}
+              disabled={selectedShareOptions.length === 0}
+            >
+              Share Records
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const sampleDocument = {
     title: 'Complete Blood Count - March 2024',
     url: '/sample-documents/cbc-report.pdf'
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <div className="container max-w-5xl mx-auto p-4 md:p-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-[#006D77]">Medical Records Hub</h1>
           <p className="text-gray-600 mt-1">Securely manage and share your medical information</p>
@@ -63,48 +288,101 @@ export function MedicalRecordsHub() {
           </div>
         )}
       </div>
-
-      {/* Global filtering controls */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="flex items-center gap-2">
-          <Calendar size={16} className="text-gray-500" />
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="Select year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All time</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2022">2022</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      
+      <div className="flex gap-3 mt-4 md:mt-0">
+        <Button 
+          variant="outline" 
+          className="bg-white"
+          onClick={() => setShowQrScanner(true)}
+        >
+          <QrCode size={16} className="mr-2" />
+          Scan QR
+        </Button>
         
-        <div className="flex items-center gap-2">
-          <FileText size={16} className="text-gray-500" />
-          <Select value={selectedProvider} onValueChange={setSelectedProvider}>
-            <SelectTrigger className="w-[200px] h-9">
-              <SelectValue placeholder="All providers" />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-9"
+        >
+          <Upload size={16} className="mr-2" />
+          Upload Records
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-9"
+          onClick={() => setShowShareModal(true)}
+        >
+          <Share2 size={16} className="mr-2" />
+          Share Records
+        </Button>
+      </div>
+
+      <div className="bg-white border rounded-lg p-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input 
+              placeholder="Search records..." 
+              value={searchKeyword}
+              onChange={e => setSearchKeyword(e.target.value)}
+              className="pl-9 bg-white" 
+            />
+          </div>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="justify-start bg-white">
+                <Calendar className="mr-2 h-4 w-4" />
+                {dateRange.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "LLL dd, y")
+                  )
+                ) : (
+                  "Date Range"
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={setDateRange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          
+          <Select defaultValue="citygeneral">
+            <SelectTrigger className="bg-white">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All providers</SelectItem>
+              <SelectItem value="all">All Providers</SelectItem>
               <SelectItem value="citygeneral">City General Hospital</SelectItem>
               <SelectItem value="quest">Quest Diagnostics</SelectItem>
               <SelectItem value="family">Family Medical Group</SelectItem>
             </SelectContent>
           </Select>
+          
+          <Select defaultValue="all">
+            <SelectTrigger className="bg-white">
+              <SelectValue placeholder="Record Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="lab">Lab Results</SelectItem>
+              <SelectItem value="imaging">Imaging</SelectItem>
+              <SelectItem value="reports">Reports</SelectItem>
+              <SelectItem value="prescriptions">Prescriptions</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        
-        <Button variant="outline" size="sm" className="h-9 ml-auto">
-          <Upload size={16} className="mr-2" />
-          Upload Records
-        </Button>
-        
-        <Button variant="outline" size="sm" className="h-9">
-          <Share2 size={16} className="mr-2" />
-          Share Records
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -271,7 +549,6 @@ export function MedicalRecordsHub() {
             </div>
           </div>
           
-          {/* PDF Viewer Dialog */}
           {selectedDocument && (
             <PDFViewer 
               documentUrl={selectedDocument.url}
@@ -305,6 +582,9 @@ export function MedicalRecordsHub() {
           </CardContent>
         </Card>
       </div>
+
+      {showQrScanner && renderQrScanner()}
+      {showShareModal && renderShareModal()}
     </div>
   );
 }

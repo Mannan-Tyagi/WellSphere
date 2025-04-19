@@ -61,6 +61,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+// Import our context
+import { useAppointments } from '@/contexts/AppointmentContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
+
 // Booking process steps
 enum BookingStep {
   FIND_DOCTOR = 0,
@@ -259,6 +263,10 @@ export default function AppointmentSchedulePage() {
   const [feeRangeFilter, setFeeRangeFilter] = useState<[number, number] | null>(null);
   const [consultationType, setConsultationType] = useState<string>('');
   
+  // Use our contexts
+  const { addAppointment, navigateToAppointmentDetails } = useAppointments();
+  const { addNotification } = useNotifications();
+
   // Filter doctors based on selected filters
   const filteredDoctors = mockDoctors.filter(doctor => {
     // Search term filter
@@ -332,20 +340,54 @@ export default function AppointmentSchedulePage() {
     }
   };
 
-  // Handle booking submission
+  // Handle booking submission with context integration
   const handleBookingSubmit = () => {
-    // In a real app, this would send the booking data to your backend
-    console.log({
-      doctor: selectedDoctor,
+    if (!selectedDoctor || !selectedTimeSlot) return;
+    
+    // Create the new appointment
+    const newAppointment = {
+      id: Date.now(),
+      title: reasonForVisit || `Appointment with Dr. ${selectedDoctor.name}`,
+      doctor: selectedDoctor.name,
+      doctorPhoto: selectedDoctor.photo,
+      specialty: selectedDoctor.specialty,
       date: selectedDate,
-      timeSlot: selectedTimeSlot,
-      appointmentType,
-      reasonForVisit,
-      hasUploaded
+      time: selectedTimeSlot.time,
+      type: appointmentType,
+      status: 'confirmed',
+      location: appointmentType === 'in-person' ? selectedDoctor.location : null,
+      notes: reasonForVisit
+    };
+    
+    // Add to global state
+    addAppointment(newAppointment);
+    
+    // Add a notification
+    addNotification({
+      id: Date.now().toString(),
+      title: 'Appointment Confirmed',
+      message: `Your appointment with Dr. ${selectedDoctor.name} on ${format(selectedDate, 'MMM d, yyyy')} at ${selectedTimeSlot.time} has been confirmed.`,
+      timestamp: new Date(),
+      read: false,
+      priority: 'normal',
+      type: 'appointment',
+      relatedItemId: newAppointment.id,
+      actionUrl: `/patient/appointments/details/${newAppointment.id}`
     });
     
     // Move to confirmation step
     setCurrentStep(BookingStep.CONFIRMATION);
+    
+    // Store the appointment ID for navigation after confirmation
+    sessionStorage.setItem('lastBookedAppointmentId', newAppointment.id.toString());
+  };
+
+  // Navigate to appointment details after booking
+  const handleViewAppointmentDetails = () => {
+    const appointmentId = sessionStorage.getItem('lastBookedAppointmentId');
+    if (appointmentId) {
+      navigateToAppointmentDetails(appointmentId);
+    }
   };
 
   // Render the doctor search and selection step
@@ -855,11 +897,9 @@ export default function AppointmentSchedulePage() {
           Add to Calendar
         </Button>
         
-        <Link href="/patient/dashboard">
-          <Button>
-            Return to Dashboard
-          </Button>
-        </Link>
+        <Button onClick={handleViewAppointmentDetails}>
+          View Appointment Details
+        </Button>
       </div>
     </div>
   );

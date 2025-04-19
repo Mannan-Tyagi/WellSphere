@@ -7,6 +7,7 @@ import {
   hasScheduleConflict
 } from './utils';
 import { v4 as uuidv4 } from 'uuid';
+import { useNotifications } from '@/contexts/NotificationsContext';
 
 // Mock data
 import { mockAppointments } from './mockData/appointments';
@@ -68,6 +69,9 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [potentialTimeSlot, setPotentialTimeSlot] = useState<{ date: Date; hour: number } | null>(null);
   const [scheduleConflicts, setScheduleConflicts] = useState<{ appointmentId: string; conflictingWith: string[] }[]>([]);
   const [showConflictModal, setShowConflictModal] = useState<boolean>(false);
+
+  // Use our notification context
+  const { addNotification } = useNotifications();
 
   // Compute the date range based on the active view
   const dateRange = getDateRangeForView(activeView, selectedDate);
@@ -139,15 +143,30 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
       title: 'New Appointment Created',
       message: `Appointment for ${appointment.patientName} on ${
         appointment.startTime.toLocaleDateString()
-      } at ${appointment.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+      } at ${appointment.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} has been scheduled.`,
       timestamp: new Date(),
       read: false,
-      priority: 'routine',
+      priority: 'normal',
       type: 'appointment'
     };
     
     setNotifications(prev => [newNotification, ...prev]);
-  }, []);
+    
+    // Also add to global notifications if available
+    if (addNotification) {
+      addNotification({
+        id: newNotification.id,
+        title: newNotification.title,
+        message: newNotification.message,
+        timestamp: newNotification.timestamp,
+        read: newNotification.read,
+        priority: 'normal',
+        type: 'appointment',
+        relatedItemId: newAppointment.id,
+        actionUrl: `/doctor/calendar?appointmentId=${newAppointment.id}`
+      });
+    }
+  }, [addNotification]);
 
   const updateAppointment = useCallback((appointment: Appointment) => {
     setAppointments(prev => prev.map(app => 
@@ -176,8 +195,23 @@ export const CalendarProvider: React.FC<{ children: ReactNode }> = ({ children }
       };
       
       setNotifications(prev => [newNotification, ...prev]);
+      
+      // Also add to global notifications if available
+      if (addNotification) {
+        addNotification({
+          id: newNotification.id,
+          title: newNotification.title,
+          message: newNotification.message,
+          timestamp: newNotification.timestamp,
+          read: newNotification.read,
+          priority: 'important',
+          type: 'appointment',
+          relatedItemId: appointment.id,
+          actionUrl: `/doctor/calendar?appointmentId=${appointment.id}`
+        });
+      }
     }
-  }, [appointments]);
+  }, [appointments, addNotification]);
 
   const deleteAppointment = useCallback((appointmentId: string) => {
     setAppointments(prev => prev.filter(app => app.id !== appointmentId));

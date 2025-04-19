@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow, format, isPast, isToday, isTomorrow, addDays } from 'date-fns';
-import { Calendar, ChevronRight, Video, MapPin, Phone, PlusCircle, Clock, MoreHorizontal, Search, CalendarDays, Filter, AlertTriangle, FileText, QrCode, Shield, Download } from 'lucide-react';
+import { Calendar, ChevronRight, Video, MapPin, Phone, PlusCircle, Clock, MoreHorizontal, Search, CalendarDays, Filter, AlertTriangle, FileText, QrCode, Shield, Download, CheckCircle2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+
+// Import our contexts
+import { useAppointments } from '@/contexts/AppointmentContext';
+import { useMedicalRecords } from '@/contexts/MedicalRecordsContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
 
 // Types and helper functions moved outside component for better memory usage
 interface Appointment {
@@ -63,76 +68,137 @@ const formatAppointmentDate = (date: Date) => {
   return format(date, 'EEE, MMM d, yyyy');
 };
 
-// Mock data
-const mockAppointments: Appointment[] = [
-  {
-    id: 1,
-    title: 'Annual Physical Examination',
-    doctor: 'Dr. Julia Smith',
-    doctorPhoto: '/assets/doctors/julia-smith.jpg',
-    specialty: 'Cardiology',
-    date: addDays(new Date(), 2),
-    time: '10:00 AM',
-    endTime: '10:45 AM',
-    type: 'in-person',
-    status: 'confirmed',
-    location: 'Central Medical Center, Room 305',
-    notes: 'Please bring your medication list'
-  },
-  // ... other appointments
-];
-
 // Main component
 export function AppointmentsPageClient() {
   const [activeTab, setActiveTab] = useState<string>('upcoming');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState<boolean>(false);
   const [showCancelDialog, setShowCancelDialog] = useState<boolean>(false);
   const [showRescheduleDialog, setShowRescheduleDialog] = useState<boolean>(false);
   const [recordAccessDuration, setRecordAccessDuration] = useState<string>("24hr");
   const [showRecordsQR, setShowRecordsQR] = useState<boolean>(false);
 
-  // Filter appointments
-  const filteredAppointments = useMemo(() => {
-    return mockAppointments.filter(appointment => {
-      // Filter logic for tab, search, status, and type
-      if (activeTab === 'upcoming' && (isPast(appointment.date) && appointment.status !== 'pending')) {
-        return false;
-      }
-      if (activeTab === 'past' && (!isPast(appointment.date) || appointment.status === 'pending')) {
-        return false;
-      }
-      
-      if (searchTerm && !appointment.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !appointment.doctor.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return false;
-      }
-      
-      if (statusFilter !== 'all' && appointment.status !== statusFilter) {
-        return false;
-      }
-      
-      if (typeFilter !== 'all' && appointment.type !== typeFilter) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [activeTab, searchTerm, statusFilter, typeFilter]);
+  // New states for enhanced filtering
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterDoctor, setFilterDoctor] = useState<string>('all');
+  const [calendarSynced, setCalendarSynced] = useState<boolean>(false);
+
+  // Use our contexts
+  const { 
+    upcomingAppointments, 
+    pastAppointments, 
+    updateAppointment,
+    cancelAppointment,
+    getAppointmentById,
+    navigateToAppointmentDetails
+  } = useAppointments();
+  
+  const { generateRecordsQR } = useMedicalRecords();
+  const { addNotification } = useNotifications();
+  
+  // Use selected appointment from state or context
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const selectedAppointment = selectedAppointmentId ? 
+    getAppointmentById(selectedAppointmentId) : null;
+
+  // Filter appointments based on multiple criteria
+  const getFilteredAppointments = () => {
+    let filtered = activeTab === 'upcoming' ? upcomingAppointments : pastAppointments;
+    
+    // Filter by appointment status
+    if (activeTab === 'upcoming') {
+      filtered = filtered.filter(appointment => 
+        !isPast(appointment.date) || 
+        (isToday(appointment.date) && appointment.status !== 'completed')
+      );
+    } else {
+      filtered = filtered.filter(appointment => 
+        (isPast(appointment.date) && !isToday(appointment.date)) || 
+        appointment.status === 'completed' ||
+        appointment.status === 'cancelled'
+      );
+    }
+    
+    // Filter by appointment type
+    if (filterType !== 'all') {
+      filtered = filtered.filter(appointment => appointment.type === filterType);
+    }
+    
+    // Filter by doctor
+    if (filterDoctor !== 'all') {
+      filtered = filtered.filter(appointment => appointment.doctor === filterDoctor);
+    }
+    
+    return filtered;
+  };
+
+  // Get unique doctors for filter
+  const getDoctors = () => {
+    const doctors = new Set(upcomingAppointments.concat(pastAppointments).map(appointment => appointment.doctor));
+    return Array.from(doctors);
+  };
+
+  // Handle calendar sync
+  const handleCalendarSync = () => {
+    // This would normally integrate with Google/Apple Calendar APIs
+    console.log('Syncing appointments to calendar');
+    setCalendarSynced(true);
+    
+    setTimeout(() => {
+      setCalendarSynced(false);
+    }, 3000);
+  };
+
+  // Get appointment conflicts (in real app, this would check against actual calendar)
+  const getAppointmentConflicts = (appointment) => {
+    const sameDay = upcomingAppointments.concat(pastAppointments).filter(a => 
+      a.id !== appointment.id && 
+      format(a.date, 'yyyy-MM-dd') === format(appointment.date, 'yyyy-MM-dd')
+    );
+    
+    if (sameDay.length === 0) return null;
+    
+    return {
+      hasConflict: true,
+      conflictingAppointments: sameDay
+    };
+  };
+
+  // Filtered appointments using all criteria
+  const filteredAppointments = getFilteredAppointments();
 
   // Event handlers
-  const handleAppointmentSelect = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
+  const handleAppointmentSelect = (appointment: any) => {
+    setSelectedAppointmentId(appointment.id);
     setShowDetailsDialog(true);
   };
 
   const handleCancelAppointment = () => {
-    console.log('Cancelling appointment:', selectedAppointment?.id);
-    setShowCancelDialog(false);
-    setShowDetailsDialog(false);
+    if (selectedAppointmentId) {
+      cancelAppointment(selectedAppointmentId);
+      
+      // Add notification for cancellation
+      addNotification({
+        id: Date.now().toString(),
+        title: 'Appointment Cancelled',
+        message: `Your appointment on ${format(selectedAppointment?.date || new Date(), 'MMM d, yyyy')} has been cancelled.`,
+        timestamp: new Date(),
+        read: false,
+        priority: 'normal',
+        type: 'appointment'
+      });
+      
+      setShowCancelDialog(false);
+      setShowDetailsDialog(false);
+    }
+  };
+
+  const handleGenerateQRCode = () => {
+    const qrToken = generateRecordsQR(recordAccessDuration);
+    // In a real app, this would generate a QR code with the token
+    setShowRecordsQR(true);
   };
 
   return (
@@ -144,79 +210,193 @@ export function AppointmentsPageClient() {
           <p className="text-gray-500">Manage and schedule your medical appointments</p>
         </div>
         
-        <Link href="/patient/appointments/schedule">
-          <Button className="mt-4 md:mt-0 bg-[#006D77] hover:bg-[#005A64]">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Book New Appointment
+        <div className="flex gap-3 mt-4 md:mt-0">
+          <Button variant="outline" className="bg-white" onClick={handleCalendarSync}>
+            {calendarSynced ? (
+              <>
+                <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
+                Synced
+              </>
+            ) : (
+              <>
+                <Calendar className="mr-2 h-4 w-4" />
+                Sync to Calendar
+              </>
+            )}
           </Button>
-        </Link>
+          
+          <Link href="/patient/appointments/schedule">
+            <Button className="bg-[#006D77] hover:bg-[#005A64]">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Book New Appointment
+            </Button>
+          </Link>
+        </div>
       </div>
       
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg border mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
+      {/* Enhanced Filters */}
+      <div className="bg-white border rounded-lg p-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="relative w-full sm:max-w-[250px]">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input 
-              placeholder="Search by doctor or appointment type" 
+              placeholder="Search appointments..." 
+              className="pl-9 bg-white" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
             />
           </div>
           
-          <div className="flex gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[130px] bg-white">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[130px] bg-white">
+          <div className="flex flex-wrap gap-2">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[130px] h-9 bg-white">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="in-person">In-Person</SelectItem>
                 <SelectItem value="video">Video</SelectItem>
+                <SelectItem value="in-person">In-Person</SelectItem>
                 <SelectItem value="phone">Phone</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={filterDoctor} onValueChange={setFilterDoctor}>
+              <SelectTrigger className="w-[130px] h-9 bg-white">
+                <SelectValue placeholder="Doctor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Doctors</SelectItem>
+                {getDoctors().map((doctor, index) => (
+                  <SelectItem key={index} value={doctor}>{doctor}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
       </div>
       
-      {/* Tabs */}
-      <Tabs 
-        defaultValue="upcoming" 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="bg-white rounded-lg border"
-      >
+      {/* Tabs - with appointment counts */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full border-b rounded-none p-0">
           <TabsTrigger 
             value="upcoming" 
             className="flex-1 py-3 rounded-none border-r data-[state=active]:bg-[#E8F3F4] data-[state=active]:text-[#006D77] data-[state=active]:shadow-none"
           >
             Upcoming
+            <Badge className="ml-2 bg-[#006D77]">
+              {upcomingAppointments.filter(a => !isPast(a.date) || (isToday(a.date) && a.status !== 'completed')).length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger 
             value="past" 
             className="flex-1 py-3 rounded-none data-[state=active]:bg-[#E8F3F4] data-[state=active]:text-[#006D77] data-[state=active]:shadow-none"
           >
             Past
+            <Badge className="ml-2 bg-gray-200 text-gray-800">
+              {pastAppointments.filter(a => (isPast(a.date) && !isToday(a.date)) || a.status === 'completed').length}
+            </Badge>
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="upcoming" className="p-4">
+          {filteredAppointments.length > 0 ? (
+            <div className="space-y-4">
+              {filteredAppointments.map((appointment) => {
+                const conflict = getAppointmentConflicts(appointment);
+                
+                return (
+                  <div 
+                    key={appointment.id}
+                    className="border rounded-lg p-4 hover:shadow-md transition-all cursor-pointer bg-white"
+                    onClick={() => handleAppointmentSelect(appointment)}
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                      <div className="flex items-start">
+                        <Avatar className="h-12 w-12 mr-3">
+                          <AvatarImage src={appointment.doctorPhoto} alt={appointment.doctor} />
+                          <AvatarFallback>{appointment.doctor.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        
+                        <div>
+                          <div className="flex items-center mb-1">
+                            <h3 className="font-medium">{appointment.title}</h3>
+                            <div className="ml-2">
+                              {getStatusBadge(appointment.status, appointment.date)}
+                            </div>
+                          </div>
+                          
+                          <p className="text-sm text-gray-600">with {appointment.doctor}</p>
+                          
+                          <div className="flex flex-wrap items-center text-sm gap-x-4 gap-y-1 mt-2">
+                            <div className="flex items-center text-gray-600">
+                              <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                              {formatAppointmentDate(appointment.date)}
+                            </div>
+                            
+                            <div className="flex items-center text-gray-600">
+                              <Clock className="h-4 w-4 mr-1 text-gray-400" />
+                              {appointment.time}
+                            </div>
+                            
+                            <div className="flex items-center text-gray-600">
+                              {getAppointmentTypeIcon(appointment.type)}
+                              <span className="ml-1 capitalize">{appointment.type}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center mt-3 md:mt-0">
+                        {appointment.type === 'video' && isToday(appointment.date) && (
+                          <Button size="sm" className="mr-2 bg-[#006D77] hover:bg-[#005A64]">
+                            <Video className="h-3 w-3 mr-1" />
+                            Join
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Show conflict warning if it exists */}
+                    {conflict && conflict.hasConflict && (
+                      <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800 flex items-start">
+                        <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p>You have {conflict.conflictingAppointments.length} other appointment(s) on this day.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="bg-gray-100 rounded-full p-3 w-14 h-14 mx-auto mb-4 flex items-center justify-center">
+                <Calendar className="h-7 w-7 text-gray-400" />
+              </div>
+              
+              <h3 className="text-lg font-medium text-gray-800 mb-2">
+                No upcoming appointments
+              </h3>
+              
+              <p className="text-gray-500 max-w-sm mx-auto mb-6">
+                Book an appointment with one of our healthcare providers to get started
+              </p>
+              
+              <Link href="/patient/appointments/schedule">
+                <Button className="bg-[#006D77] hover:bg-[#005A64]">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Book New Appointment
+                </Button>
+              </Link>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="past" className="p-4">
           {filteredAppointments.length > 0 ? (
             <div className="space-y-4">
               {filteredAppointments.map((appointment) => (
@@ -277,25 +457,14 @@ export function AppointmentsPageClient() {
               </div>
               
               <h3 className="text-lg font-medium text-gray-800 mb-2">
-                No upcoming appointments
+                No past appointments
               </h3>
               
               <p className="text-gray-500 max-w-sm mx-auto mb-6">
-                Book an appointment with one of our healthcare providers to get started
+                Your past appointments will appear here once completed.
               </p>
-              
-              <Link href="/patient/appointments/schedule">
-                <Button className="bg-[#006D77] hover:bg-[#005A64]">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Book New Appointment
-                </Button>
-              </Link>
             </div>
           )}
-        </TabsContent>
-        
-        <TabsContent value="past" className="p-4">
-          {/* Similar content for past appointments */}
         </TabsContent>
       </Tabs>
       
@@ -391,7 +560,7 @@ export function AppointmentsPageClient() {
                   {/* QR Generator */}
                   {!showRecordsQR ? (
                     <Button 
-                      onClick={() => setShowRecordsQR(true)}
+                      onClick={handleGenerateQRCode}
                       className="w-full bg-[#006D77] hover:bg-[#005A64] text-sm"
                     >
                       <QrCode className="h-4 w-4 mr-2" />

@@ -1,49 +1,21 @@
 import React from 'react';
 import Link from 'next/link';
-import { format, isPast, isToday, isTomorrow, addDays } from 'date-fns';
+import { format, isPast, isToday, isTomorrow } from 'date-fns';
 import { Calendar, ChevronRight, Video, MapPin, Phone, PlusCircle, Clock, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+// Import our context
+import { useAppointments } from '@/contexts/AppointmentContext';
 
 interface AppointmentWidgetProps {
   className?: string;
 }
 
 const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ className }) => {
-  // In a real app, this would come from an API
-  const appointments = [
-    {
-      id: 1,
-      title: 'Annual Physical Examination',
-      doctor: 'Dr. Julia Smith',
-      doctorPhoto: '/assets/doctors/julia-smith.jpg',
-      specialty: 'Cardiology',
-      date: addDays(new Date(), 2),
-      time: '10:00 AM',
-      type: 'in-person',
-      status: 'confirmed',
-      location: 'Central Medical Center, Room 305'
-    },
-    {
-      id: 2,
-      title: 'Diabetes Follow-up',
-      doctor: 'Dr. Michael Chen',
-      doctorPhoto: '/assets/doctors/michael-chen.jpg',
-      specialty: 'Endocrinology',
-      date: addDays(new Date(), 7),
-      time: '2:30 PM',
-      type: 'video',
-      status: 'confirmed',
-      location: null
-    }
-  ];
-
-  // Filter to only show upcoming appointments
-  const upcomingAppointments = appointments.filter(
-    appointment => !isPast(appointment.date) || isToday(appointment.date)
-  );
+  // Use our context
+  const { upcomingAppointments, navigateToAppointmentDetails, navigateToBooking } = useAppointments();
 
   // Helper function to format date
   const formatAppointmentDate = (date: Date) => {
@@ -55,14 +27,10 @@ const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ className }) => {
   // Helper function to get appointment type icon
   const getAppointmentTypeIcon = (type: string) => {
     switch (type) {
-      case 'in-person':
-        return <MapPin className="h-4 w-4 text-emerald-600" />;
-      case 'video':
-        return <Video className="h-4 w-4 text-blue-600" />;
-      case 'phone':
-        return <Phone className="h-4 w-4 text-purple-600" />;
-      default:
-        return <Calendar className="h-4 w-4 text-gray-600" />;
+      case 'in-person': return <MapPin className="h-4 w-4 text-emerald-600" />;
+      case 'video': return <Video className="h-4 w-4 text-blue-600" />;
+      case 'phone': return <Phone className="h-4 w-4 text-purple-600" />;
+      default: return <Calendar className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -80,16 +48,17 @@ const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ className }) => {
       <CardContent>
         <div className="space-y-4">
           {upcomingAppointments.length > 0 ? (
-            upcomingAppointments.map((appointment) => (
+            upcomingAppointments.slice(0, 3).map((appointment) => (
               <div 
                 key={appointment.id} 
-                className="border rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                className="border rounded-lg p-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => navigateToAppointmentDetails(appointment.id)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-start">
                     <Avatar className="h-10 w-10 mr-3">
                       <AvatarImage src={appointment.doctorPhoto} alt={appointment.doctor} />
-                      <AvatarFallback>{appointment.doctor.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{appointment.doctor?.charAt(0) || 'D'}</AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="font-medium">{appointment.title}</h3>
@@ -131,21 +100,27 @@ const AppointmentWidget: React.FC<AppointmentWidgetProps> = ({ className }) => {
                 <AlertCircle className="h-6 w-6 text-gray-400" />
               </div>
               <p>No upcoming appointments</p>
-              <Link href="/patient/appointments/schedule" className="text-sm text-[#006D77] hover:underline mt-2 inline-block">
+              <Button 
+                className="text-sm text-[#006D77] hover:underline mt-2 inline-block"
+                variant="link"
+                onClick={navigateToBooking}
+              >
                 Schedule an appointment
-              </Link>
+              </Button>
             </div>
           )}
         </div>
         
         {upcomingAppointments.length > 0 && (
           <div className="mt-4">
-            <Link href="/patient/appointments/schedule">
-              <Button variant="outline" className="w-full border-[#006D77] text-[#006D77] hover:bg-[#F0F9FA] bg-white">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Schedule New Appointment
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              className="w-full border-[#006D77] text-[#006D77] hover:bg-[#F0F9FA] bg-white"
+              onClick={navigateToBooking}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Schedule New Appointment
+            </Button>
           </div>
         )}
       </CardContent>

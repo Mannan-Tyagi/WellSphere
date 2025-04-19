@@ -1,69 +1,117 @@
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { 
+  X, 
+  Upload, 
+  Calendar, 
+  ChevronLeft, 
+  ChevronRight, 
+  CheckCircle, 
+  ArrowRight,
+  FileText,
+  CreditCard,
+  Sparkles
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  X, Upload, ArrowRight, CheckCircle, FileText, Clipboard, 
-  Pencil, FileCheck, QrCode, Scan, Camera, CheckCircle2
-} from 'lucide-react';
 
-import ClaimDocumentUploader from './ClaimDocumentUploader';
-
-interface ClaimSubmissionFlowProps {
-  onClose: () => void;
-}
-
-const ClaimSubmissionFlow: React.FC<ClaimSubmissionFlowProps> = ({ onClose }) => {
+export function ClaimSubmissionFlow({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
-  const [claimData, setClaimData] = useState({
-    provider: '',
+  const [formData, setFormData] = useState({
+    providerName: '',
     serviceDate: '',
-    cptCodes: '',
-    diagnosis: '',
-    amount: '',
-    selectedDocuments: [],
-    selectedInsurance: ''
+    serviceType: '',
+    totalAmount: '',
+    insurancePlan: '',
+    memberID: '',
+    groupNumber: '',
+    description: '',
+    receiptFile: null,
+    formFile: null,
+    additionalDocuments: []
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   
-  // Mock insurance options
-  const insuranceOptions = [
-    { id: 'ins1', name: 'BlueCross Health', plan: 'PPO 1500', memberID: 'BC12345678' },
-    { id: 'ins2', name: 'Medicare', plan: 'Part B', memberID: 'M987654321' }
-  ];
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value, type } = e.target;
+    if (type === 'file') {
+      if (name === 'additionalDocuments') {
+        setFormData({
+          ...formData,
+          [name]: [...formData.additionalDocuments, ...Array.from(e.target.files)]
+        });
+      } else {
+        setFormData({
+          ...formData,
+          [name]: e.target.files[0]
+        });
+      }
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  };
   
-  const handleChange = (field, value) => {
-    setClaimData({
-      ...claimData,
-      [field]: value
+  // Remove a file from additional documents
+  const removeAdditionalFile = (index) => {
+    setFormData({
+      ...formData,
+      additionalDocuments: formData.additionalDocuments.filter((_, i) => i !== index)
     });
   };
   
-  const handleDocumentsSelected = (documents) => {
-    setClaimData({
-      ...claimData,
-      selectedDocuments: documents
-    });
-  };
-  
+  // Handle form submission
   const handleSubmit = () => {
-    // Submit claim data to backend
-    console.log('Submitting claim:', claimData);
-    // Move to confirmation step
-    setStep(5);
+    setSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setSubmitting(false);
+      setSubmitted(true);
+    }, 2000);
+  };
+  
+  // Check if current step is valid
+  const isStepValid = () => {
+    if (step === 1) {
+      return formData.providerName && 
+             formData.serviceDate && 
+             formData.serviceType && 
+             formData.totalAmount;
+    }
+    
+    if (step === 2) {
+      return formData.insurancePlan && 
+             formData.memberID && 
+             formData.description;
+    }
+    
+    if (step === 3) {
+      return formData.receiptFile !== null;
+    }
+    
+    return true;
   };
 
   return (
-    <Card className="border-[#E8F3F4]">
-      <div className="p-4 border-b flex justify-between items-center">
+    <Card className="fixed inset-0 flex flex-col max-w-3xl mx-auto my-12 overflow-hidden z-50">
+      {/* Header */}
+      <div className="p-4 border-b flex justify-between items-center bg-[#F0F9FA]">
         <h2 className="text-xl font-bold text-[#006D77]">Submit New Claim</h2>
         <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
       </div>
       
-      {/* Step indicators */}
+      {/* Progress Steps */}
       <div className="p-4 border-b bg-[#F0F9FA]">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -74,7 +122,9 @@ const ClaimSubmissionFlow: React.FC<ClaimSubmissionFlowProps> = ({ onClose }) =>
             }`}>
               {step > 1 ? <CheckCircle size={16} /> : '1'}
             </div>
-            <div className="mx-2 h-px w-8 bg-gray-300"></div>
+            <div className={`mx-2 h-px w-8 bg-gray-300 ${
+              step > 1 ? 'bg-green-300' : 'bg-gray-300'
+            }`}></div>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
               step > 2 ? 'bg-green-100 text-green-800' : 
               step === 2 ? 'bg-[#006D77] text-white' : 
@@ -82,7 +132,9 @@ const ClaimSubmissionFlow: React.FC<ClaimSubmissionFlowProps> = ({ onClose }) =>
             }`}>
               {step > 2 ? <CheckCircle size={16} /> : '2'}
             </div>
-            <div className="mx-2 h-px w-8 bg-gray-300"></div>
+            <div className={`mx-2 h-px w-8 bg-gray-300 ${
+              step > 2 ? 'bg-green-300' : 'bg-gray-300'
+            }`}></div>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
               step > 3 ? 'bg-green-100 text-green-800' : 
               step === 3 ? 'bg-[#006D77] text-white' : 
@@ -90,398 +142,482 @@ const ClaimSubmissionFlow: React.FC<ClaimSubmissionFlowProps> = ({ onClose }) =>
             }`}>
               {step > 3 ? <CheckCircle size={16} /> : '3'}
             </div>
-            <div className="mx-2 h-px w-8 bg-gray-300"></div>
+            <div className={`mx-2 h-px w-8 bg-gray-300 ${
+              step > 3 ? 'bg-green-300' : 'bg-gray-300'
+            }`}></div>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-              step > 4 ? 'bg-green-100 text-green-800' : 
               step === 4 ? 'bg-[#006D77] text-white' : 
               'bg-gray-100 text-gray-500'
             }`}>
-              {step > 4 ? <CheckCircle size={16} /> : '4'}
+              4
             </div>
           </div>
-          <div className="text-sm text-gray-600">
-            Step {step} of 4: {
-              step === 1 ? 'Upload Bill' : 
-              step === 2 ? 'AI Audit' : 
-              step === 3 ? 'Insurance Matching' : 
-              step === 4 ? 'E-Sign & Submit' : 
-              'Confirmation'
-            }
-          </div>
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <span>Service Details</span>
+          <span>Insurance Info</span>
+          <span>Documentation</span>
+          <span>Review</span>
         </div>
       </div>
       
-      <div className="p-6">
-        {/* Step 1: Upload Bill */}
+      {/* Content */}
+      <div className="flex-grow p-5 overflow-y-auto">
+        {/* Step 1: Service Details */}
         {step === 1 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Upload your medical bill</h3>
-            <p className="text-gray-600">Upload a bill or enter the bill details manually</p>
+            <h3 className="font-medium text-lg">Service Details</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-pointer">
-                <div className="h-12 w-12 rounded-full bg-[#F0F9FA] flex items-center justify-center text-[#006D77] mb-2">
-                  <QrCode size={24} />
-                </div>
-                <h3 className="font-medium">Scan QR Code</h3>
-                <p className="text-xs text-gray-500 mt-1">Use your camera to scan the QR code on your bill</p>
-                <Button className="mt-3 bg-[#006D77] hover:bg-[#00585F]">
-                  <Camera size={16} className="mr-2" />
-                  Scan Now
-                </Button>
-              </div>
-              
-              <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-pointer">
-                <div className="h-12 w-12 rounded-full bg-[#F0F9FA] flex items-center justify-center text-[#006D77] mb-2">
-                  <Upload size={24} />
-                </div>
-                <h3 className="font-medium">Upload Files</h3>
-                <p className="text-xs text-gray-500 mt-1">Upload bill PDFs or images</p>
-                <ClaimDocumentUploader onDocumentsSelected={handleDocumentsSelected} />
+            <div>
+              <Label htmlFor="providerName">Provider Name *</Label>
+              <Input 
+                id="providerName" 
+                name="providerName" 
+                value={formData.providerName}
+                onChange={handleInputChange}
+                placeholder="Healthcare provider's name"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="serviceDate">Service Date *</Label>
+              <Input 
+                id="serviceDate" 
+                name="serviceDate" 
+                type="date" 
+                value={formData.serviceDate}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="serviceType">Type of Service *</Label>
+              <Select 
+                value={formData.serviceType} 
+                onValueChange={(value) => setFormData({...formData, serviceType: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a service type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="office-visit">Office Visit</SelectItem>
+                  <SelectItem value="lab-test">Laboratory Test</SelectItem>
+                  <SelectItem value="imaging">Imaging (X-ray, MRI, etc.)</SelectItem>
+                  <SelectItem value="surgery">Surgery</SelectItem>
+                  <SelectItem value="dental">Dental</SelectItem>
+                  <SelectItem value="vision">Vision</SelectItem>
+                  <SelectItem value="therapy">Therapy</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="totalAmount">Total Amount *</Label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</div>
+                <Input 
+                  id="totalAmount" 
+                  name="totalAmount" 
+                  type="number" 
+                  step="0.01" 
+                  min="0"
+                  value={formData.totalAmount}
+                  onChange={handleInputChange}
+                  className="pl-7"
+                  placeholder="0.00"
+                  required
+                />
               </div>
             </div>
             
-            <div className="border-t pt-4 mt-4">
-              <h3 className="text-lg font-medium mb-3">Or enter bill details manually</h3>
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="provider">Healthcare Provider</Label>
-                  <Input 
-                    id="provider" 
-                    placeholder="Provider or facility name"
-                    value={claimData.provider}
-                    onChange={(e) => handleChange('provider', e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="serviceDate">Service Date</Label>
-                    <Input 
-                      id="serviceDate" 
-                      type="date"
-                      value={claimData.serviceDate}
-                      onChange={(e) => handleChange('serviceDate', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="amount">Total Amount</Label>
-                    <Input 
-                      id="amount" 
-                      placeholder="$0.00"
-                      value={claimData.amount}
-                      onChange={(e) => handleChange('amount', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="cptCodes">CPT/HCPCS Codes</Label>
-                  <Input 
-                    id="cptCodes" 
-                    placeholder="e.g. 99214, 85025"
-                    value={claimData.cptCodes}
-                    onChange={(e) => handleChange('cptCodes', e.target.value)}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Separate multiple codes with commas</p>
-                </div>
-                <div>
-                  <Label htmlFor="diagnosis">Diagnosis (ICD-10)</Label>
-                  <Input 
-                    id="diagnosis" 
-                    placeholder="e.g. J45.901"
-                    value={claimData.diagnosis}
-                    onChange={(e) => handleChange('diagnosis', e.target.value)}
-                  />
-                </div>
-              </div>
+            <div>
+              <Label htmlFor="description">Description of Services</Label>
+              <Textarea 
+                id="description" 
+                name="description" 
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Brief description of the healthcare services received"
+                rows={3}
+              />
             </div>
           </div>
         )}
         
-        {/* Step 2: AI Audit */}
+        {/* Step 2: Insurance Information */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">AI-powered Bill Audit</h3>
-              <div className="flex items-center text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                <CheckCircle size={16} className="mr-1" />
-                <span className="text-sm font-medium">Audit Complete</span>
-              </div>
+            <h3 className="font-medium text-lg">Insurance Information</h3>
+            
+            <div>
+              <Label htmlFor="insurancePlan">Insurance Plan *</Label>
+              <Select 
+                value={formData.insurancePlan} 
+                onValueChange={(value) => setFormData({...formData, insurancePlan: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your insurance plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blue-cross">Blue Cross Blue Shield PPO Family Plan</SelectItem>
+                  <SelectItem value="delta-dental">Delta Dental Complete</SelectItem>
+                  <SelectItem value="other">Other (specify in notes)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
-            <div className="bg-[#F0F9FA] border border-[#E8F3F4] rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-medium">{claimData.provider || 'City Medical Center'}</h4>
-                  <p className="text-sm text-gray-600">{claimData.serviceDate || '2025-03-22'}</p>
-                </div>
-                <div className="text-lg font-bold">${claimData.amount || '320.75'}</div>
-              </div>
-              
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center text-green-600">
-                  <CheckCircle size={16} className="mr-2" />
-                  <span className="text-sm">All charges appear reasonable</span>
-                </div>
-                <div className="flex items-center text-green-600">
-                  <CheckCircle size={16} className="mr-2" />
-                  <span className="text-sm">CPT codes match provided services</span>
-                </div>
-                <div className="flex items-center text-green-600">
-                  <CheckCircle size={16} className="mr-2" />
-                  <span className="text-sm">No duplicate charges detected</span>
-                </div>
-                <div className="flex items-center text-green-600">
-                  <CheckCircle size={16} className="mr-2" />
-                  <span className="text-sm">ICD-10 diagnosis codes are valid</span>
-                </div>
-              </div>
+            <div>
+              <Label htmlFor="memberID">Member ID / Policy Number *</Label>
+              <Input 
+                id="memberID" 
+                name="memberID" 
+                value={formData.memberID}
+                onChange={handleInputChange}
+                placeholder="Your insurance member ID"
+                required
+              />
             </div>
             
-            <div className="bg-white border rounded-lg p-4">
-              <h4 className="font-medium mb-2">Insurance Coverage Estimate</h4>
-              <div className="flex justify-between items-center mb-1">
-                <div>
-                  <span className="text-sm">BlueCross Health PPO</span>
-                </div>
-                <div className="text-sm font-medium">Coverage: 80%</div>
-              </div>
-              <div className="flex justify-between text-sm">
-                <div>Estimated out-of-pocket:</div>
-                <div className="font-medium">${(parseFloat(claimData.amount || '320.75') * 0.2).toFixed(2)}</div>
-              </div>
+            <div>
+              <Label htmlFor="groupNumber">Group Number (if applicable)</Label>
+              <Input 
+                id="groupNumber" 
+                name="groupNumber" 
+                value={formData.groupNumber}
+                onChange={handleInputChange}
+                placeholder="Insurance group number"
+              />
             </div>
             
-            <div className="bg-white border rounded-lg p-4">
-              <h4 className="font-medium mb-2">Required Documentation</h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 border rounded-md">
-                  <div className="flex items-center">
-                    <FileCheck size={16} className="mr-2 text-green-600" />
-                    <span className="text-sm">Itemized Bill</span>
-                  </div>
-                  <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Detected</div>
-                </div>
-                <div className="flex items-center justify-between p-2 border rounded-md">
-                  <div className="flex items-center">
-                    <FileCheck size={16} className="mr-2 text-green-600" />
-                    <span className="text-sm">Insurance Card</span>
-                  </div>
-                  <div className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">On File</div>
-                </div>
-                <div className="flex items-center justify-between p-2 border rounded-md">
-                  <div className="flex items-center">
-                    <FileText size={16} className="mr-2 text-amber-600" />
-                    <span className="text-sm">Proof of Payment</span>
-                  </div>
-                  <div className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Optional</div>
-                </div>
+            <div className="p-4 bg-blue-50 rounded-md mt-4">
+              <div className="flex items-center">
+                <Sparkles className="h-5 w-5 text-blue-600 mr-2" />
+                <h4 className="font-medium text-blue-800">Smart Claim Tip</h4>
               </div>
+              <p className="text-sm text-blue-700 mt-1">
+                Including your complete insurance information speeds up claim processing time by up to 35%.
+              </p>
             </div>
           </div>
         )}
         
-        {/* Step 3: Insurance Matching */}
+        {/* Step 3: Documentation */}
         {step === 3 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Select Insurance Plan</h3>
-            <p className="text-gray-600">Choose the insurance plan for this claim</p>
+            <h3 className="font-medium text-lg">Documentation</h3>
+            <p className="text-sm text-gray-600">
+              Upload documents to support your claim. The receipt is required, but other documentation may help expedite your claim.
+            </p>
             
-            <div className="space-y-3">
-              {insuranceOptions.map(insurance => (
-                <div 
-                  key={insurance.id}
-                  className={`border rounded-lg p-4 cursor-pointer hover:bg-gray-50 ${
-                    claimData.selectedInsurance === insurance.id ? 'border-[#006D77] bg-[#F0F9FA]' : ''
-                  }`}
-                  onClick={() => handleChange('selectedInsurance', insurance.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">{insurance.name}</h4>
-                      <p className="text-sm text-gray-600">{insurance.plan}</p>
-                      <p className="text-xs text-gray-500 mt-1">Member ID: {insurance.memberID}</p>
+            <div className="space-y-6">
+              <div>
+                <Label className="font-medium">Receipt / Invoice *</Label>
+                <div className="mt-2 border-2 border-dashed rounded-md p-6 text-center">
+                  {formData.receiptFile ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FileText className="h-8 w-8 text-[#006D77] mr-2" />
+                        <div className="text-left">
+                          <p className="font-medium">{formData.receiptFile.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {Math.round(formData.receiptFile.size / 1024)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setFormData({...formData, receiptFile: null})}
+                      >
+                        <X size={16} />
+                      </Button>
                     </div>
-                    <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${
-                      claimData.selectedInsurance === insurance.id 
-                        ? 'border-[#006D77] bg-[#006D77] text-white' 
-                        : 'border-gray-300'
-                    }`}>
-                      {claimData.selectedInsurance === insurance.id && <CheckCircle size={12} />}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="bg-[#F0F9FA] border border-[#E8F3F4] rounded-lg p-4 mt-4">
-              <h4 className="font-medium mb-2">Auto-Matched Insurance Codes</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-[#006D77] text-white rounded-full flex items-center justify-center mr-2">
-                      <CheckCircle2 size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">CPT Codes Matched</p>
-                      <p className="text-xs text-gray-600">99214: Office Visit, Established Patient</p>
-                    </div>
-                  </div>
-                  <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                    100% Match
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-[#006D77] text-white rounded-full flex items-center justify-center mr-2">
-                      <CheckCircle2 size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">ICD-10 Diagnosis Matched</p>
-                      <p className="text-xs text-gray-600">J45.901: Unspecified asthma with (acute) exacerbation</p>
-                    </div>
-                  </div>
-                  <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                    100% Match
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Step 4: E-Sign & Submit */}
-        {step === 4 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Review & Submit Claim</h3>
-            <p className="text-gray-600">Please review your claim information and sign to submit</p>
-            
-            <div className="bg-[#F0F9FA] border border-[#E8F3F4] rounded-lg p-4">
-              <h4 className="font-medium mb-3">Claim Summary</h4>
-              <div className="grid grid-cols-2 gap-y-2 text-sm">
-                <div className="text-gray-600">Healthcare Provider:</div>
-                <div className="font-medium">{claimData.provider || 'City Medical Center'}</div>
-                
-                <div className="text-gray-600">Service Date:</div>
-                <div className="font-medium">{claimData.serviceDate || '2025-03-22'}</div>
-                
-                <div className="text-gray-600">Total Amount:</div>
-                <div className="font-medium">${claimData.amount || '320.75'}</div>
-                
-                <div className="text-gray-600">Insurance Plan:</div>
-                <div className="font-medium">
-                  {insuranceOptions.find(i => i.id === claimData.selectedInsurance)?.name || 'BlueCross Health'} - 
-                  {insuranceOptions.find(i => i.id === claimData.selectedInsurance)?.plan || 'PPO 1500'}
-                </div>
-                
-                <div className="text-gray-600">Member ID:</div>
-                <div className="font-medium">
-                  {insuranceOptions.find(i => i.id === claimData.selectedInsurance)?.memberID || 'BC12345678'}
-                </div>
-                
-                <div className="text-gray-600">Estimated Coverage:</div>
-                <div className="font-medium text-green-600">
-                  $256.60 (80%)
-                </div>
-                
-                <div className="text-gray-600">Estimated Out-of-Pocket:</div>
-                <div className="font-medium">
-                  $64.15 (20%)
-                </div>
-              </div>
-            </div>
-            
-            <div className="border rounded-lg p-4">
-              <h4 className="font-medium mb-3">Documentation</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                  <div className="flex items-center">
-                    <FileText size={16} className="mr-2 text-[#006D77]" />
-                    <span className="text-sm">Itemized Bill.pdf</span>
-                  </div>
-                  <div className="text-xs text-green-600">Uploaded</div>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                  <div className="flex items-center">
-                    <FileText size={16} className="mr-2 text-[#006D77]" />
-                    <span className="text-sm">Insurance Card.jpg</span>
-                  </div>
-                  <div className="text-xs text-green-600">On File</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border rounded-lg p-4">
-              <div className="flex items-start mb-4">
-                <div className="border border-dashed rounded w-40 h-24 flex items-center justify-center mr-4">
-                  <p className="text-sm text-gray-500">Sign here</p>
-                </div>
-                <div>
-                  <h4 className="font-medium">Electronic Signature</h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    By signing, I certify that the information provided is true and accurate to the best of my knowledge.
-                  </p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    <Pencil size={14} className="mr-1" /> Clear Signature
-                  </Button>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 mb-2">Drag and drop or click to upload</p>
+                      <Input
+                        type="file"
+                        id="receiptFile"
+                        name="receiptFile"
+                        className="hidden"
+                        onChange={handleInputChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={() => document.getElementById('receiptFile').click()}
+                      >
+                        Select File
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
               
-              <div className="flex items-center">
-                <input type="checkbox" id="agreement" className="mr-2" />
-                <Label htmlFor="agreement" className="text-sm">
-                  I authorize the release of any medical information necessary to process this claim.
-                </Label>
+              <div>
+                <Label className="font-medium">Claim Form (if applicable)</Label>
+                <div className="mt-2 border-2 border-dashed rounded-md p-6 text-center">
+                  {formData.formFile ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FileText className="h-8 w-8 text-[#006D77] mr-2" />
+                        <div className="text-left">
+                          <p className="font-medium">{formData.formFile.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {Math.round(formData.formFile.size / 1024)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setFormData({...formData, formFile: null})}
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 mb-2">Insurance claim form from your provider</p>
+                      <Input
+                        type="file"
+                        id="formFile"
+                        name="formFile"
+                        className="hidden"
+                        onChange={handleInputChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={() => document.getElementById('formFile').click()}
+                      >
+                        Select File
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <Label className="font-medium">Additional Documents</Label>
+                <div className="mt-2 border-2 border-dashed rounded-md p-6 text-center">
+                  {formData.additionalDocuments.length > 0 ? (
+                    <div className="space-y-2">
+                      {formData.additionalDocuments.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FileText className="h-6 w-6 text-[#006D77] mr-2" />
+                            <div className="text-left">
+                              <p className="font-medium">{file.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {Math.round(file.size / 1024)} KB
+                              </p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => removeAdditionalFile(index)}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button 
+                        variant="outline" 
+                        className="mt-2" 
+                        onClick={() => document.getElementById('additionalDocuments').click()}
+                      >
+                        Add More Files
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500 mb-2">Supporting documents like referrals or EOBs</p>
+                      <Input
+                        type="file"
+                        id="additionalDocuments"
+                        name="additionalDocuments"
+                        className="hidden"
+                        onChange={handleInputChange}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        multiple
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={() => document.getElementById('additionalDocuments').click()}
+                      >
+                        Select Files
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
         
-        {/* Step 5: Confirmation */}
-        {step === 5 && (
-          <div className="space-y-4 text-center">
-            <div className="py-6">
-              <div className="h-16 w-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={32} />
+        {/* Step 4: Review */}
+        {step === 4 && !submitted && (
+          <div className="space-y-4">
+            <h3 className="font-medium text-lg">Review and Submit</h3>
+            <p className="text-sm text-gray-600">
+              Please review the information below before submitting your claim.
+            </p>
+            
+            <div className="border rounded-md overflow-hidden">
+              <div className="bg-gray-50 p-3 border-b">
+                <h4 className="font-medium">Service Details</h4>
               </div>
-              <h3 className="text-xl font-medium">Claim Submitted Successfully!</h3>
-              <p className="text-gray-600 mt-2">
-                Your claim has been submitted to BlueCross Health for processing.
-              </p>
-              <div className="mt-4">
-                <p className="text-sm font-medium">Claim ID: CL-25863149</p>
-                <p className="text-sm text-gray-600">Submitted on: {new Date().toLocaleDateString()}</p>
+              <div className="p-3 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Provider:</span>
+                  <span className="font-medium">{formData.providerName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Service Date:</span>
+                  <span className="font-medium">{formData.serviceDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Service Type:</span>
+                  <span className="font-medium">{formData.serviceType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Amount:</span>
+                  <span className="font-medium">${formData.totalAmount}</span>
+                </div>
+                <div className="pt-2">
+                  <span className="text-gray-600">Description:</span>
+                  <p className="text-sm mt-1">{formData.description}</p>
+                </div>
               </div>
             </div>
             
-            <div className="bg-[#F0F9FA] border border-[#E8F3F4] rounded-lg p-4 text-left">
-              <h4 className="font-medium mb-2">What Happens Next?</h4>
-              <ol className="text-sm space-y-2 list-decimal pl-5">
-                <li>Your claim is being processed by BlueCross Health</li>
-                <li>You'll receive notifications as your claim progresses</li>
-                <li>Typical processing time is 2-4 weeks</li>
-                <li>Once approved, reimbursement will be issued based on your plan benefits</li>
-              </ol>
+            <div className="border rounded-md overflow-hidden">
+              <div className="bg-gray-50 p-3 border-b">
+                <h4 className="font-medium">Insurance Information</h4>
+              </div>
+              <div className="p-3 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Insurance Plan:</span>
+                  <span className="font-medium">{formData.insurancePlan}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Member ID:</span>
+                  <span className="font-medium">{formData.memberID}</span>
+                </div>
+                {formData.groupNumber && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Group Number:</span>
+                    <span className="font-medium">{formData.groupNumber}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="border rounded-md overflow-hidden">
+              <div className="bg-gray-50 p-3 border-b">
+                <h4 className="font-medium">Documents</h4>
+              </div>
+              <div className="p-3 space-y-2">
+                <div className="flex items-center">
+                  <FileText className="h-4 w-4 text-[#006D77] mr-2" />
+                  <span className="font-medium">{formData.receiptFile?.name || "No receipt uploaded"}</span>
+                </div>
+                {formData.formFile && (
+                  <div className="flex items-center">
+                    <FileText className="h-4 w-4 text-[#006D77] mr-2" />
+                    <span>{formData.formFile.name}</span>
+                  </div>
+                )}
+                {formData.additionalDocuments.length > 0 && (
+                  <div>
+                    <span className="text-gray-600">Additional Documents:</span>
+                    <ul className="ml-6 mt-1 text-sm">
+                      {formData.additionalDocuments.map((file, index) => (
+                        <li key={index} className="list-disc">{file.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="p-4 bg-blue-50 rounded-md mt-4">
+              <div className="flex items-start">
+                <div className="rounded-full bg-blue-100 p-1 flex-shrink-0 mr-2">
+                  <CreditCard className="h-4 w-4 text-blue-700" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-blue-800">Reimbursement Method</h4>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Approved claims will be reimbursed via your preferred payment method on file.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Submission Success */}
+        {submitted && (
+          <div className="flex flex-col items-center justify-center h-full py-12">
+            <div className="rounded-full bg-green-100 p-4 mb-4">
+              <CheckCircle className="h-12 w-12 text-green-600" />
+            </div>
+            <h3 className="text-xl font-bold text-center">Claim Submitted Successfully!</h3>
+            <p className="text-gray-600 text-center mt-2 max-w-md">
+              Your claim has been submitted and will be processed within 5-7 business days. 
+              You'll receive updates via email and notifications in your account.
+            </p>
+            <div className="bg-gray-50 p-4 rounded-md mt-6 w-full max-w-md">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Claim Reference:</span>
+                <span className="font-medium">CLM-{Math.floor(100000 + Math.random() * 900000)}</span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="text-gray-600">Submission Date:</span>
+                <span className="font-medium">{new Date().toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
         )}
       </div>
       
-      {/* Navigation buttons */}
+      {/* Footer */}
       <div className="p-4 border-t flex justify-between">
-        {step < 5 ? (
+        {!submitted ? (
           <>
             <Button 
-              variant="outline"
+              variant="outline" 
               onClick={() => step > 1 ? setStep(step - 1) : onClose()}
             >
-              {step === 1 ? 'Cancel' : 'Back'}
+              {step > 1 ? 'Back' : 'Cancel'}
             </Button>
+            
             <Button 
               className="bg-[#006D77] hover:bg-[#00585F]"
               onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()}
+              disabled={!isStepValid() || submitting}
             >
-              {step === 4 ? 'Submit Claim' : 'Continue'}
-              <ArrowRight size={16} className="ml-2" />
+              {step === 4 ? (
+                submitting ? (
+                  <>Submitting<span className="animate-pulse">...</span></>
+                ) : (
+                  'Submit Claim'
+                )
+              ) : (
+                <>
+                  Continue
+                  <ArrowRight size={16} className="ml-2" />
+                </>
+              )}
             </Button>
           </>
         ) : (
@@ -495,6 +631,4 @@ const ClaimSubmissionFlow: React.FC<ClaimSubmissionFlowProps> = ({ onClose }) =>
       </div>
     </Card>
   );
-};
-
-export default ClaimSubmissionFlow;
+}
