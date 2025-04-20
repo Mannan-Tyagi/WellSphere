@@ -163,9 +163,9 @@ export default function MessagesPage() {
 
   // AI-suggested responses
   const aiSuggestions = [
-    'Yes, I can make it to the appointment tomorrow.',
-    'Ive been experiencing some side effects from the medication.',
-    'Thank you for the information, I'll follow the instructions.'
+    "Yes, I can make it to the appointment tomorrow.",
+    "Ive been experiencing some side effects from the medication.",
+    "Thank you for the information, I'll follow the instructions.",
   ];
 
   // Load conversations data
