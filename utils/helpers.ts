@@ -52,7 +52,10 @@ export function filterItems<T extends { [key: string]: any }>(
 /**
  * Get status badge configuration based on status string
  */
-export function getStatusBadge(status: string): { className: string; text: string } {
+export function getStatusBadge(status: string): {
+  className: string;
+  text: string;
+} {
   const statusConfig: Record<string, { className: string; text: string }> = {
     paid: {
       className:
