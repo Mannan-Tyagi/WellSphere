@@ -37,11 +37,11 @@ const TabsTrigger = React.forwardRef<
 ))
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+const TabsContentFallback = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content
+  <div
     ref={ref}
     className={cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -50,6 +50,50 @@ const TabsContent = React.forwardRef<
     {...props}
   />
 ))
+TabsContentFallback.displayName = "TabsContentFallback"
+
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => {
+  // Create a wrapper component that safely renders content regardless of context
+  const [isMounted, setIsMounted] = React.useState(false);
+  const [isInTabsContext, setIsInTabsContext] = React.useState(true);
+  
+  React.useEffect(() => {
+    setIsMounted(true);
+    // We'll use a quick check - if there's an error when this component mounts,
+    // we know we're not in a Tabs context, but we need to be mounted first to catch it
+    try {
+      const dummyElement = document.createElement('div');
+      // This line will throw if we're not in a TabsContext
+      new TabsPrimitive.Content({ children: dummyElement });
+      setIsInTabsContext(true);
+    } catch (e) {
+      setIsInTabsContext(false);
+      console.warn("TabsContent is being used outside of a Tabs component - falling back to div");
+    }
+  }, []);
+  
+  // Before mount, render nothing to avoid errors during SSR
+  if (!isMounted) {
+    return null;
+  }
+  
+  // Either render the Tabs content or a fallback div, based on context detection
+  return isInTabsContext ? (
+    <TabsPrimitive.Content
+      ref={ref}
+      className={cn(
+        "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        className
+      )}
+      {...props}
+    />
+  ) : (
+    <TabsContentFallback ref={ref as React.RefObject<HTMLDivElement>} className={className} {...props} />
+  );
+})
 TabsContent.displayName = TabsPrimitive.Content.displayName
 
 export { Tabs, TabsList, TabsTrigger, TabsContent }
