@@ -12,7 +12,7 @@ import {
   ChevronLeft, 
   Image, 
   Sparkles, 
-  Attachment, 
+  FileText, // Use FileText instead of Attachment which isn't exported
   Clock, 
   Calendar,
   MoreVertical,
@@ -488,7 +488,7 @@ export default function MessagesPage() {
                           
                           {message.attachment && (
                             <div className="mt-2 bg-white/20 p-2 rounded flex items-center text-sm">
-                              <Attachment className="h-4 w-4 mr-2" />
+                              <FileText className="h-4 w-4 mr-2" />
                               <span>{message.attachment.name}</span>
                               <span className="ml-auto text-xs opacity-70">{message.attachment.size}</span>
                             </div>

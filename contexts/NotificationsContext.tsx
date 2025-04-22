@@ -1,208 +1,157 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+"use client";
+
+import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { Notification } from '../types/notification';
 
-// Define types for notifications
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  priority: 'normal' | 'important' | 'urgent';
-  type: 'appointment' | 'message' | 'medication' | 'record' | 'system';
-  relatedItemId?: string | number;
-  relatedItemType?: string;
-  actionUrl?: string;
-}
-
-interface NotificationsContextType {
+interface NotificationsContextProps {
   notifications: Notification[];
+  loadingNotifications: boolean;
   unreadCount: number;
   addNotification: (notification: Notification) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   deleteNotification: (id: string) => void;
   handleNotificationClick: (notification: Notification) => void;
-  loadingNotifications: boolean;
 }
 
-// Create the context
-const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
+// Export the context directly so it can be imported if needed
+export const NotificationsContext = createContext<NotificationsContextProps | undefined>(undefined);
 
-// Create a provider component
-export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+// Add export keyword here to create a named export
+export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
-  const router = useRouter();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Get router reference lazily - only when needed
+  const router = typeof window !== 'undefined' ? useRouter() : null;
 
   // Fetch notifications on component mount
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        // In a real app, this would be an API call
-        const storedNotifications = localStorage.getItem('notifications');
-        if (storedNotifications) {
-          const parsedNotifications = JSON.parse(storedNotifications, (key, value) => {
-            if (key === 'timestamp') {
-              return new Date(value);
-            }
-            return value;
-          });
-          setNotifications(parsedNotifications);
-        }
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-      } finally {
-        setLoadingNotifications(false);
-      }
-    };
+    // Simulate fetching notifications from API
+    setTimeout(() => {
+      // Example notifications data
+      const fetchedNotifications: Notification[] = [
+        // Your initial notifications data can go here
+      ];
 
-    fetchNotifications();
-    
-    // Setup event listeners for real-time updates
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('notification_updated', handleNotificationEvent as EventListener);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('notification_updated', handleNotificationEvent as EventListener);
-    };
+      setNotifications(fetchedNotifications);
+      setLoadingNotifications(false);
+      updateUnreadCount(fetchedNotifications);
+    }, 1000);
   }, []);
 
-  // Handle storage change for cross-tab synchronization
-  const handleStorageChange = (event: StorageEvent) => {
-    if (event.key === 'notifications' && event.newValue) {
-      const updatedNotifications = JSON.parse(event.newValue, (key, value) => {
-        if (key === 'timestamp') {
-          return new Date(value);
-        }
-        return value;
-      });
-      setNotifications(updatedNotifications);
-    }
+  // Update unread count whenever notifications change
+  const updateUnreadCount = (notifs: Notification[]) => {
+    const count = notifs.filter(notif => !notif.read).length;
+    setUnreadCount(count);
   };
-
-  // Handle custom notification events
-  const handleNotificationEvent = (event: CustomEvent) => {
-    if (event.detail && event.detail.notifications) {
-      setNotifications(event.detail.notifications);
-    }
-  };
-
-  // Persist notifications to localStorage
-  useEffect(() => {
-    if (notifications.length > 0) {
-      localStorage.setItem('notifications', JSON.stringify(notifications));
-      
-      // Dispatch a custom event
-      const event = new CustomEvent('notification_updated', { 
-        detail: { notifications } 
-      });
-      window.dispatchEvent(event);
-    }
-  }, [notifications]);
-
-  // Calculate unread count
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Add a new notification
   const addNotification = (notification: Notification) => {
-    const newNotification = {
-      ...notification,
-      id: typeof notification.id !== 'undefined' ? notification.id : Date.now().toString(),
-      timestamp: notification.timestamp || new Date(),
-      read: false
-    };
-    
-    setNotifications(prev => [newNotification, ...prev]);
+    setNotifications(prev => [notification, ...prev]);
+    updateUnreadCount([notification, ...notifications]);
   };
 
-  // Mark a notification as read
+  // Mark notification as read
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
+    setNotifications(prev =>
+      prev.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
+    updateUnreadCount(notifications.map(notification =>
+      notification.id === id ? { ...notification, read: true } : notification
+    ));
   };
 
   // Mark all notifications as read
   const markAllAsRead = () => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(notification => ({ ...notification, read: true }))
     );
+    setUnreadCount(0);
   };
 
   // Delete a notification
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
+    updateUnreadCount(notifications.filter(notification => notification.id !== id));
   };
 
-  // Handle notification click navigation
-  const handleNotificationClick = (notification: Notification) => {
+  // Safe navigation function - use the router here when it's needed
+  const navigateTo = useCallback((url: string) => {
+    if (router) {
+      router.push(url);
+    } else if (typeof window !== 'undefined') {
+      // Fallback if router isn't available
+      window.location.href = url;
+    }
+  }, [router]);
+
+  // Handle notification click
+  const handleNotificationClick = useCallback((notification: Notification) => {
     // Mark the notification as read
     markAsRead(notification.id);
-    
+
     // Navigate based on notification type
     if (notification.actionUrl) {
-      router.push(notification.actionUrl);
+      navigateTo(notification.actionUrl);
       return;
     }
-    
+
     switch (notification.type) {
       case 'appointment':
         if (notification.relatedItemId) {
           sessionStorage.setItem('selectedAppointmentId', notification.relatedItemId.toString());
-          router.push(`/patient/appointments/details/${notification.relatedItemId}`);
+          navigateTo(`/patient/appointments/details/${notification.relatedItemId}`);
         } else {
-          router.push('/patient/appointments');
+          navigateTo('/patient/appointments');
         }
         break;
       case 'message':
         if (notification.relatedItemId) {
           sessionStorage.setItem('selectedMessageId', notification.relatedItemId.toString());
-          router.push(`/patient/messages/${notification.relatedItemId}`);
+          navigateTo(`/patient/messages/${notification.relatedItemId}`);
         } else {
-          router.push('/patient/messages');
+          navigateTo('/patient/messages');
         }
         break;
       case 'medication':
         if (notification.relatedItemId) {
           sessionStorage.setItem('selectedMedicationId', notification.relatedItemId.toString());
-          router.push(`/patient/medications/${notification.relatedItemId}`);
+          navigateTo(`/patient/medications/${notification.relatedItemId}`);
         } else {
-          router.push('/patient/medications');
+          navigateTo('/patient/medications');
         }
         break;
       case 'record':
         if (notification.relatedItemId) {
           sessionStorage.setItem('selectedRecordId', notification.relatedItemId.toString());
-          router.push(`/patient/medical-records/${notification.relatedItemId}`);
+          navigateTo(`/patient/medical-records/${notification.relatedItemId}`);
         } else {
-          router.push('/patient/medical-records');
+          navigateTo('/patient/medical-records');
         }
         break;
       case 'system':
       default:
-        router.push('/patient/dashboard');
+        navigateTo('/patient/dashboard');
         break;
     }
-  };
-
-  // Context value
-  const value = {
-    notifications,
-    unreadCount,
-    addNotification,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    handleNotificationClick,
-    loadingNotifications
-  };
+  }, [router, notifications]);
 
   return (
-    <NotificationsContext.Provider value={value}>
+    <NotificationsContext.Provider value={{
+      notifications,
+      loadingNotifications,
+      unreadCount,
+      addNotification,
+      markAsRead,
+      markAllAsRead,
+      deleteNotification,
+      handleNotificationClick
+    }}>
       {children}
     </NotificationsContext.Provider>
   );
@@ -212,7 +161,10 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
 export const useNotifications = () => {
   const context = useContext(NotificationsContext);
   if (context === undefined) {
-    throw new Error('useNotifications must be used within a NotificationsProvider');
+    throw new Error('useNotifications must be used within a NotificationProvider');
   }
   return context;
 };
+
+// Add default export to support both import styles
+export default NotificationProvider;
