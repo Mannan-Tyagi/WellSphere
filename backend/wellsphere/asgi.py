@@ -1,0 +1,25 @@
+"""
+ASGI config for WellSphere project.
+"""
+
+import os
+import django
+
+from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from django.conf import settings
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings.DJANGO_SETTINGS_MODULE)
+django.setup()
+
+from messaging.routing import websocket_urlpatterns
+
+application = ProtocolTypeRouter({
+    'http': get_asgi_application(),
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            websocket_urlpatterns
+        )
+    ),
+})

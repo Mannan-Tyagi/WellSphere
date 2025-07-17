@@ -1,0 +1,171 @@
+INFO 2025-04-24 23:54:20,908 autoreload 16248 15908 Watching for file changes with StatReloader
+WARNING 2025-04-24 23:54:35,109 log 16248 10596 Not Found: /
+WARNING 2025-04-24 23:54:35,110 basehttp 16248 10596 "GET / HTTP/1.1" 404 2189
+WARNING 2025-04-24 23:54:35,205 log 16248 10596 Not Found: /favicon.ico
+WARNING 2025-04-24 23:54:35,206 basehttp 16248 10596 "GET /favicon.ico HTTP/1.1" 404 2240
+WARNING 2025-04-24 23:55:59,652 log 16248 10596 Not Found: /api/docs/
+WARNING 2025-04-24 23:55:59,652 basehttp 16248 10596 "GET /api/docs/ HTTP/1.1" 404 2234
+WARNING 2025-04-24 23:58:18,644 log 16248 10596 Not Found: /user/register/
+WARNING 2025-04-24 23:58:18,645 basehttp 16248 10596 "GET /user/register/ HTTP/1.1" 404 2249
+WARNING 2025-04-25 00:03:14,385 log 16248 8208 Not Found: /user/register/
+WARNING 2025-04-25 00:03:14,387 basehttp 16248 8208 "POST /user/register/ HTTP/1.1" 404 2250
+WARNING 2025-04-25 00:08:04,374 log 16248 6324 Not Found: /users/register/
+WARNING 2025-04-25 00:08:04,382 basehttp 16248 6324 "POST /users/register/ HTTP/1.1" 404 2253
+WARNING 2025-04-25 00:12:13,990 log 16248 8440 Not Found: /users/doctors/
+WARNING 2025-04-25 00:12:14,011 basehttp 16248 8440 "GET /users/doctors/ HTTP/1.1" 404 2249
+WARNING 2025-04-25 00:12:43,852 log 16248 8440 Not Found: /users/register/
+WARNING 2025-04-25 00:12:43,853 basehttp 16248 8440 "POST /users/register/ HTTP/1.1" 404 2253
+INFO 2025-04-25 00:13:14,723 autoreload 16248 15908 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\wellsphere\urls.py changed, reloading.
+INFO 2025-04-25 00:13:20,717 autoreload 8576 13932 Watching for file changes with StatReloader
+INFO 2025-04-25 00:15:09,753 autoreload 5604 9844 Watching for file changes with StatReloader
+INFO 2025-04-25 00:16:16,852 autoreload 5604 9844 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\urls.py changed, reloading.
+INFO 2025-04-25 00:16:23,843 autoreload 5148 15088 Watching for file changes with StatReloader
+INFO 2025-04-25 00:20:43,665 autoreload 5148 15088 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\urls.py changed, reloading.
+INFO 2025-04-25 00:20:49,348 autoreload 14476 15728 Watching for file changes with StatReloader
+INFO 2025-04-25 00:21:47,136 autoreload 14476 15728 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 00:21:51,406 autoreload 2852 15948 Watching for file changes with StatReloader
+INFO 2025-04-25 00:22:20,422 autoreload 2852 15948 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\serializers.py changed, reloading.
+INFO 2025-04-25 00:22:22,835 autoreload 4256 14092 Watching for file changes with StatReloader
+WARNING 2025-04-25 00:22:52,169 log 4256 14044 Unauthorized: /users/register/
+WARNING 2025-04-25 00:22:52,171 basehttp 4256 14044 "POST /users/register/ HTTP/1.1" 401 143
+WARNING 2025-04-25 00:36:20,964 log 4256 15868 Unauthorized: /users/register/
+WARNING 2025-04-25 00:36:20,966 basehttp 4256 15868 "POST /users/register/ HTTP/1.1" 401 143
+INFO 2025-04-25 00:38:38,888 autoreload 4256 14092 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 00:38:41,274 autoreload 12256 15532 Watching for file changes with StatReloader
+INFO 2025-04-25 00:40:25,079 autoreload 12256 15532 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 00:40:27,230 autoreload 13468 14672 Watching for file changes with StatReloader
+WARNING 2025-04-25 00:41:11,339 log 13468 14636 Bad Request: /users/register/
+WARNING 2025-04-25 00:41:11,341 basehttp 13468 14636 "POST /users/register/ HTTP/1.1" 400 58
+INFO 2025-04-25 00:41:54,458 basehttp 13468 14636 "POST /users/register/ HTTP/1.1" 201 42
+INFO 2025-04-25 01:15:41,074 autoreload 13468 14672 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 01:15:43,675 autoreload 9492 12224 Watching for file changes with StatReloader
+INFO 2025-04-25 01:18:56,721 autoreload 9492 12224 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 01:19:05,674 autoreload 12140 8128 Watching for file changes with StatReloader
+INFO 2025-04-25 01:20:11,497 autoreload 12140 8128 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\urls.py changed, reloading.
+INFO 2025-04-25 01:20:15,601 autoreload 14324 5024 Watching for file changes with StatReloader
+INFO 2025-04-25 01:20:21,112 autoreload 14324 5024 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\permissions.py changed, reloading.
+INFO 2025-04-25 01:20:23,497 autoreload 4276 12224 Watching for file changes with StatReloader
+WARNING 2025-04-25 01:20:32,715 log 4276 15964 Unauthorized: /users/register/
+WARNING 2025-04-25 01:20:32,717 basehttp 4276 15964 "POST /users/register/ HTTP/1.1" 401 143
+INFO 2025-04-25 01:23:12,922 autoreload 4276 12224 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 01:23:18,324 autoreload 5976 8268 Watching for file changes with StatReloader
+WARNING 2025-04-25 01:23:32,102 log 5976 13028 Bad Request: /users/register/
+WARNING 2025-04-25 01:23:32,104 basehttp 5976 13028 "POST /users/register/ HTTP/1.1" 400 58
+ERROR 2025-04-25 01:23:44,279 services 5976 13028 Error creating user: (1062, "Duplicate entry 'fcca2bf3cf9d40c4b6f42d071dab7320' for key 'users_patientprofile.user_id'")
+WARNING 2025-04-25 01:23:44,284 log 5976 13028 Bad Request: /users/register/
+WARNING 2025-04-25 01:23:44,287 basehttp 5976 13028 "POST /users/register/ HTTP/1.1" 400 159
+INFO 2025-04-25 01:25:56,007 autoreload 5976 8268 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py changed, reloading.
+INFO 2025-04-25 01:25:58,450 autoreload 14144 5216 Watching for file changes with StatReloader
+ERROR 2025-04-25 01:27:29,309 services 14144 1260 Error creating user: (1062, "Duplicate entry 'f057b10ead644cac8cc276ca3bf27300' for key 'users_patientprofile.user_id'")
+ERROR 2025-04-25 01:27:29,313 exceptions 14144 1260 Unhandled exception: name 'ValidationError' is not defined
+Traceback (most recent call last):
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 255, in query
+    _mysql.connection.query(self, query)
+MySQLdb.IntegrityError: (1062, "Duplicate entry 'f057b10ead644cac8cc276ca3bf27300' for key 'users_patientprofile.user_id'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\services.py", line 40, in create_user
+    PatientProfile.objects.create(user=user)
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\query.py", line 658, in create
+    obj.save(force_insert=True, using=self.db)
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\base.py", line 814, in save
+    self.save_base(
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\base.py", line 877, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\base.py", line 1020, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\base.py", line 1061, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 102, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\django\db\backends\mysql\base.py", line 75, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\MySQLdb\connections.py", line 255, in query
+    _mysql.connection.query(self, query)
+django.db.utils.IntegrityError: (1062, "Duplicate entry 'f057b10ead644cac8cc276ca3bf27300' for key 'users_patientprofile.user_id'")
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py", line 80, in create
+    user = services.create_user(user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\services.py", line 51, in create_user
+    raise ValidationError({"detail": "Error creating user: " + str(e)})
+rest_framework.exceptions.ValidationError: {'detail': ErrorDetail(string='Error creating user: (1062, "Duplicate entry \'f057b10ead644cac8cc276ca3bf27300\' for key \'users_patientprofile.user_id\'")', code='invalid')}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\views.py", line 86, in create
+    except ValidationError as e:
+           ^^^^^^^^^^^^^^^
+NameError: name 'ValidationError' is not defined
+ERROR 2025-04-25 01:27:29,405 log 14144 1260 Internal Server Error: /users/register/
+ERROR 2025-04-25 01:27:29,409 basehttp 14144 1260 "POST /users/register/ HTTP/1.1" 500 123
+INFO 2025-04-25 01:28:27,077 autoreload 14144 5216 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\services.py changed, reloading.
+INFO 2025-04-25 01:28:29,855 autoreload 10604 10300 Watching for file changes with StatReloader
+INFO 2025-04-25 01:30:18,565 services 10604 9608 Created new user: tyagiji@gmail.com with role: patient
+INFO 2025-04-25 01:30:18,571 basehttp 10604 9608 "POST /users/register/ HTTP/1.1" 201 42
+INFO 2025-04-25 01:33:11,022 autoreload 10604 10300 F:\Education\COLLEGE\PROGRAMING\React JS\WellSphere\devlopment\WellSphere\backend\users\services.py changed, reloading.
+INFO 2025-04-25 01:33:16,549 autoreload 8284 14208 Watching for file changes with StatReloader
+ERROR 2025-04-25 01:33:25,281 views 8284 952 Serializer validation failed: {'email': [ErrorDetail(string='user with this email address already exists.', code='unique')]}
+WARNING 2025-04-25 01:33:25,285 log 8284 952 Bad Request: /users/register/
+WARNING 2025-04-25 01:33:25,288 basehttp 8284 952 "POST /users/register/ HTTP/1.1" 400 58
+INFO 2025-04-25 01:33:46,938 views 8284 952 Attempting to create user with email: tyagi1@gmail.com
+INFO 2025-04-25 01:33:46,943 services 8284 952 Creating new user with email: tyagi1@gmail.com
+INFO 2025-04-25 01:33:49,111 services 8284 952 Successfully created user with ID: 58ea2b18-2f84-4d4d-aabc-4db68f1e2088, email: tyagi1@gmail.com
+INFO 2025-04-25 01:33:49,118 services 8284 952 Creating patient profile for user: 58ea2b18-2f84-4d4d-aabc-4db68f1e2088
+ERROR 2025-04-25 01:33:49,131 services 8284 952 Profile creation failed, but user was created: (1062, "Duplicate entry '58ea2b182f844d4daabc4db68f1e2088' for key 'users_patientprofile.user_id'")
+INFO 2025-04-25 01:33:49,135 views 8284 952 User created successfully with ID: 58ea2b18-2f84-4d4d-aabc-4db68f1e2088
+INFO 2025-04-25 01:33:49,139 basehttp 8284 952 "POST /users/register/ HTTP/1.1" 201 91

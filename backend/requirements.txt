@@ -1,0 +1,55 @@
+# Django and REST framework
+Django==4.2.7
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+django-cors-headers==4.3.0
+django-filter==23.3
+drf-yasg==1.21.7
+
+# Database
+mysqlclient==2.2.0
+dj-database-url==2.1.0
+
+# Channels for WebSockets
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+
+# Environment and utilities
+python-dotenv==1.0.0
+python-dateutil==2.8.2
+Pillow==10.1.0  # For image processing
+pytz==2023.3.post1
+requests==2.31.0
+
+# Security
+django-cryptography==1.1
+argon2-cffi==23.1.0  # For password hashing
+pyjwt==2.8.0
+
+# Storage (for production)
+django-storages==1.14.2
+boto3==1.28.64  # For AWS S3 storage
+
+# WSGI server for production
+gunicorn==21.2.0
+
+# Monitoring
+sentry-sdk==1.32.0
+
+# Performance
+django-redis==5.4.0
+whitenoise==6.6.0  # For static file serving
+
+# Excel/CSV export
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+
+# Documentation
+Sphinx==7.2.6
+
+# Testing
+pytest==7.4.3
+pytest-django==4.5.2
+coverage==7.3.2
+faker==19.12.0

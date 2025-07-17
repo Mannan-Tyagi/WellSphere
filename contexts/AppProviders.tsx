@@ -1,22 +1,18 @@
 "use client";
 
 import React, { ReactNode } from 'react';
-import { AppointmentProvider } from './AppointmentContext';
-import { MedicalRecordsProvider } from './MedicalRecordsContext';
-import { NotificationsProvider } from './NotificationsContext';
+import { NotificationProvider } from './NotificationsContext';
 
 interface AppProvidersProps {
   children: ReactNode;
 }
 
-export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
+export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <NotificationsProvider>
-      <MedicalRecordsProvider>
-        <AppointmentProvider>
-          {children}
-        </AppointmentProvider>
-      </MedicalRecordsProvider>
-    </NotificationsProvider>
+    <NotificationProvider>
+      {children}
+    </NotificationProvider>
   );
-};
+}
+
+export default AppProviders;
